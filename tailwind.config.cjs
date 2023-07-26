@@ -6,6 +6,8 @@ export default {
     colors: {
       'black': '#000000',
       'white': '#ffffff',
+      'red': 'red',
+      'yellow': 'yellow'
     },
   },
   plugins: [],

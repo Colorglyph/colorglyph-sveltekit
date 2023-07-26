@@ -2,9 +2,9 @@ import * as SorobanClient from 'soroban-client';
 import { xdr } from 'soroban-client';
 import { Buffer } from "buffer";
 import { scValStrToJs, scValToJs, addressToScVal, u128ToScVal, i128ToScVal, strToScVal } from './convert.js';
-import { invoke, InvokeArgs } from './invoke.js';
+import { invoke } from './invoke.js';
+import { ResponseTypes } from './method-options.js'
 
-export * from './convert.js'
 export * from './constants.js'
 export * from './server.js'
 export * from './invoke.js'
@@ -91,212 +91,380 @@ function getError(err: string): Err<Error_> | undefined {
     return undefined;
 }
 
-export async function initialize({ token_id, fee_address }: { token_id: Address, fee_address: Address }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<void> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function initialize<R extends ResponseTypes = undefined>({token_address, fee_address}: {token_address: Address, fee_address: Address}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'initialize',
-        args: [((i) => addressToScVal(i))(token_id),
+        args: [((i) => addressToScVal(i))(token_address),
         ((i) => addressToScVal(i))(fee_address)],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return;
+        ...options,
+        parseResultXdr: () => {},
+    });
 }
 
-export async function colors_mine({ miner, to, colors }: { miner: Address, to: Option<Address>, colors: Array<[u32, u32]> }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<void> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function colorsMine<R extends ResponseTypes = undefined>({miner, to, colors}: {miner: Address, to: Option<Address>, colors: Map<u32, u32>}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'colors_mine',
         args: [((i) => addressToScVal(i))(miner),
         ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-        ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvVec([
-            ((i) => xdr.ScVal.scvU32(i))(i[0]),
-            ((i) => xdr.ScVal.scvU32(i))(i[1])
-        ]))))(colors)],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return;
+        ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>xdr.ScVal.scvU32(i))(key),
+                val: ((i)=>xdr.ScVal.scvU32(i))(value)})
+          })))(colors)],
+        ...options,
+        parseResultXdr: () => {},
+    });
 }
 
-export async function colors_transfer({ from, to, colors }: { from: Address, to: Address, colors: Array<MinerColorAmount> }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<void> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function colorsTransfer<R extends ResponseTypes = undefined>({from, to, colors}: {from: Address, to: Address, colors: Array<[Address, u32, u32]>}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'colors_transfer',
-        args: [
-            ((i) => addressToScVal(i))(from),
-            ((i) => addressToScVal(i))(to),
-            ((i) => xdr.ScVal.scvVec(i.map((i) => MinerColorAmountToXdr(i))))(colors)
-        ],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return;
+        args: [((i) => addressToScVal(i))(from),
+        ((i) => addressToScVal(i))(to),
+        ((i) => xdr.ScVal.scvVec(i.map((i)=>xdr.ScVal.scvVec([((i) => addressToScVal(i))(i[0]),
+        ((i) => xdr.ScVal.scvU32(i))(i[1]),
+        ((i) => xdr.ScVal.scvU32(i))(i[2])]))))(colors)],
+        ...options,
+        parseResultXdr: () => {},
+    });
 }
 
-export async function color_balance({ owner, miner, color }: { owner: Address, miner: Option<Address>, color: u32 }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<u32> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function colorBalance<R extends ResponseTypes = undefined>({owner, miner, color}: {owner: Address, miner: Option<Address>, color: u32}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `u32`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'color_balance',
         args: [((i) => addressToScVal(i))(owner),
         ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(miner),
         ((i) => xdr.ScVal.scvU32(i))(color)],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return scValStrToJs(response.xdr) as u32;
+        ...options,
+        parseResultXdr: (xdr): u32 => {
+            return scValStrToJs(xdr);
+        },
+    });
 }
 
-export async function glyph_mint({ minter, to, colors, width }: { minter: Address, to: Option<Address>, colors: Array<[Address, Array<[u32, Array<u32>]>]>, width: u32 }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<Buffer> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function glyphMint<R extends ResponseTypes = undefined>({minter, to, colors, width, id}: {minter: Address, to: Option<Address>, colors: Option<Map<Address, Map<u32, Array<u32>>>>, width: Option<u32>, id: Option<u64>}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `HashId`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'glyph_mint',
         args: [((i) => addressToScVal(i))(minter),
         ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-        ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvVec([
-            ((i) => addressToScVal(i))(i[0]),
-            ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvVec([
-                ((i) => xdr.ScVal.scvU32(i))(i[0]),
-                ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvU32(i))))(i[1])
-            ]))))(i[1])
-        ]))))(colors),
-        ((i) => xdr.ScVal.scvU32(i))(width)],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return scValStrToJs(response.xdr) as Buffer;
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>addressToScVal(i))(key),
+                val: ((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>xdr.ScVal.scvU32(i))(key),
+                val: ((i)=>xdr.ScVal.scvVec(i.map((i)=>xdr.ScVal.scvU32(i))))(value)})
+          })))(value)})
+          })))(colors),
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvU32(i))(width),
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvU64(xdr.Uint64.fromString(i.toString())))(id)],
+        ...options,
+        parseResultXdr: (xdr): HashId => {
+            return HashIdFromXdr(xdr);
+        },
+    });
 }
 
-export async function glyph_get({ hash }: { hash: Buffer }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<Result<Glyph>> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
-        method: 'glyph_get',
-        args: [((i) => xdr.ScVal.scvBytes(i))(hash)],
-    };
-
-    try {
-
-        // @ts-ignore Type does exist
-        const response = await invoke(invokeArgs);
-        return new Ok(scValStrToJs(response.xdr) as Glyph);
-    } catch (e) {
-        //@ts-ignore
-        let err = getError(e.message);
-        if (err) {
-            return err;
-        } else {
-            throw e;
-        }
-    }
+export async function glyphTransfer<R extends ResponseTypes = undefined>({from, to, hash_id}: {from: Address, to: Address, hash_id: HashId}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `Option<u64>`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
+        method: 'glyph_transfer',
+        args: [((i) => addressToScVal(i))(from),
+        ((i) => addressToScVal(i))(to),
+        ((i) => HashIdToXdr(i))(hash_id)],
+        ...options,
+        parseResultXdr: (xdr): Option<u64> => {
+            return scValStrToJs(xdr);
+        },
+    });
 }
 
-export async function glyph_scrape({ owner, to, hash }: { owner: Address, to: Option<Address>, hash: Buffer }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<void> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function glyphScrape<R extends ResponseTypes = undefined>({owner, to, hash_id}: {owner: Address, to: Option<Address>, hash_id: HashId}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `Option<u64>`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'glyph_scrape',
-        args: [
-            ((i) => addressToScVal(i))(owner),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-            ((i) => xdr.ScVal.scvBytes(i))(hash)
-        ],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return;
+        args: [((i) => addressToScVal(i))(owner),
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
+        ((i) => HashIdToXdr(i))(hash_id)],
+        ...options,
+        parseResultXdr: (xdr): Option<u64> => {
+            return scValStrToJs(xdr);
+        },
+    });
 }
 
-export async function offer_post({ seller, sell, buy }: { seller: Address, sell: OfferType, buy: OfferType }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<Result<void>> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function glyphGet<R extends ResponseTypes = undefined>({hash_id}: {hash_id: HashId}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `Ok<GlyphType> | Err<Error_> | undefined`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
+        method: 'glyph_get',
+        args: [((i) => HashIdToXdr(i))(hash_id)],
+        ...options,
+        parseResultXdr: (xdr): Ok<GlyphType> | Err<Error_> | undefined => {
+            try {
+                return new Ok(scValStrToJs(xdr));
+            } catch (e) {
+                //@ts-ignore
+                let err = getError(e.message);
+                if (err) {
+                    return err;
+                } else {
+                    throw e;
+                }
+            }
+        },
+    });
+}
+
+export async function offerPost<R extends ResponseTypes = undefined>({seller, sell, buy}: {seller: Address, sell: OfferType, buy: OfferType}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `Ok<void> | Err<Error_> | undefined`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'offer_post',
-        args: [
-            ((i) => addressToScVal(i))(seller),
-            ((i) => OfferTypeToXdr(i))(sell),
-            ((i) => OfferTypeToXdr(i))(buy)
-        ],
-    };
-
-    try {
-
-        // @ts-ignore Type does exist
-        const response = await invoke(invokeArgs);
-        return new Ok(scValStrToJs(response.xdr) as void);
-    } catch (e) {
-        //@ts-ignore
-        let err = getError(e.message);
-        if (err) {
-            return err;
-        } else {
-            throw e;
-        }
-    }
+        args: [((i) => addressToScVal(i))(seller),
+        ((i) => OfferTypeToXdr(i))(sell),
+        ((i) => OfferTypeToXdr(i))(buy)],
+        ...options,
+        parseResultXdr: (xdr): Ok<void> | Err<Error_> | undefined => {
+            try {
+                return new Ok(scValStrToJs(xdr));
+            } catch (e) {
+                //@ts-ignore
+                let err = getError(e.message);
+                if (err) {
+                    return err;
+                } else {
+                    throw e;
+                }
+            }
+        },
+    });
 }
 
-export async function offers_get({ sell, buy }: { sell: OfferType, buy: OfferType }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<Result<Offer>> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
-        method: 'offers_get',
-        args: [
-            ((i) => OfferTypeToXdr(i))(sell),
-            ((i) => OfferTypeToXdr(i))(buy)
-        ],
-    };
-
-    try {
-
-        // @ts-ignore Type does exist
-        const response = await invoke(invokeArgs);
-        return new Ok(scValStrToJs(response.xdr) as Offer);
-    } catch (e) {
-        //@ts-ignore
-        let err = getError(e.message);
-        if (err) {
-            return err;
-        } else {
-            throw e;
-        }
-    }
-}
-
-export async function offer_delete({ seller, sell, buy }: { seller: Address, sell: OfferType, buy: OfferType }, { signAndSend, fee }: { signAndSend?: boolean, fee?: number } = { signAndSend: false, fee: 100 }): Promise<void> {
-    let invokeArgs: InvokeArgs = {
-        signAndSend,
-        fee,
+export async function offerDelete<R extends ResponseTypes = undefined>({seller, sell, buy}: {seller: Address, sell: OfferType, buy: OfferType}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
         method: 'offer_delete',
-        args: [
-            ((i) => addressToScVal(i))(seller),
-            ((i) => OfferTypeToXdr(i))(sell),
-            ((i) => OfferTypeToXdr(i))(buy)
-        ],
-    };
-
-    // @ts-ignore Type does exist
-    const response = await invoke(invokeArgs);
-    return;
+        args: [((i) => addressToScVal(i))(seller),
+        ((i) => OfferTypeToXdr(i))(sell),
+        ((i) => OfferTypeToXdr(i))(buy)],
+        ...options,
+        parseResultXdr: () => {},
+    });
 }
 
-const Errors = [
-    { message: "" },
-    { message: "" },
-    { message: "" },
-    { message: "" }
+export async function offersGet<R extends ResponseTypes = undefined>({sell, buy}: {sell: OfferType, buy: OfferType}, options: {
+  /**
+   * The fee to pay for the transaction. Default: 100.
+   */
+  fee?: number
+  /**
+   * What type of response to return.
+   *
+   *   - `undefined`, the default, parses the returned XDR as `Ok<Offer> | Err<Error_> | undefined`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
+   *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
+   */
+  responseType?: R
+  /**
+   * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
+   */
+  secondsToWait?: number
+} = {}) {
+    return await invoke({
+        method: 'offers_get',
+        args: [((i) => OfferTypeToXdr(i))(sell),
+        ((i) => OfferTypeToXdr(i))(buy)],
+        ...options,
+        parseResultXdr: (xdr): Ok<Offer> | Err<Error_> | undefined => {
+            try {
+                return new Ok(scValStrToJs(xdr));
+            } catch (e) {
+                //@ts-ignore
+                let err = getError(e.message);
+                if (err) {
+                    return err;
+                } else {
+                    throw e;
+                }
+            }
+        },
+    });
+}
+
+const Errors = [ 
+{message:""},
+  {message:""},
+  {message:""},
+  {message:""},
+  {message:""},
+  {message:""},
+  {message:""}
 ]
-export type StorageKey = { tag: "None", values: void } | { tag: "InitToken", values: void } | { tag: "InitFee", values: void } | { tag: "Glyph", values: [Buffer] } | { tag: "GlyphOwner", values: [Buffer] } | { tag: "GlyphMinter", values: [Buffer] } | { tag: "GlyphOffer", values: [Buffer] } | { tag: "AssetOffer", values: [AssetOffer] };
+export type StorageKey = {tag: "TokenAddress", values: void} | {tag: "FeeAddress", values: void} | {tag: "Colors", values: [u64]} | {tag: "Glyph", values: [Buffer]} | {tag: "GlyphOwner", values: [Buffer]} | {tag: "GlyphMinter", values: [Buffer]} | {tag: "Color", values: [Address, Address, u32]} | {tag: "GlyphOffer", values: [Buffer]} | {tag: "AssetOffer", values: [Buffer, Address, i128]};
 
 function StorageKeyToXdr(storageKey?: StorageKey): xdr.ScVal {
     if (!storageKey) {
@@ -304,45 +472,44 @@ function StorageKeyToXdr(storageKey?: StorageKey): xdr.ScVal {
     }
     let res: xdr.ScVal[] = [];
     switch (storageKey.tag) {
-        case "None":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("None"));
+        case "TokenAddress":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("TokenAddress"));
             break;
-        case "InitToken":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("InitToken"));
+    case "FeeAddress":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("FeeAddress"));
             break;
-        case "InitFee":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("InitFee"));
+    case "Colors":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
+            res.push(((i)=>xdr.ScVal.scvU64(xdr.Uint64.fromString(i.toString())))(storageKey.values[0]));
             break;
-        case "Glyph":
+    case "Glyph":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(...((i) => [
-                ((i) => xdr.ScVal.scvBytes(i))(i[0])
-            ])(storageKey.values));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
             break;
-        case "GlyphOwner":
+    case "GlyphOwner":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphOwner"));
-            res.push(...((i) => [
-                ((i) => xdr.ScVal.scvBytes(i))(i[0])
-            ])(storageKey.values));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
             break;
-        case "GlyphMinter":
+    case "GlyphMinter":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphMinter"));
-            res.push(...((i) => [
-                ((i) => xdr.ScVal.scvBytes(i))(i[0])
-            ])(storageKey.values));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
             break;
-        case "GlyphOffer":
+    case "Color":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Color"));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[0]));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[1]));
+            res.push(((i)=>xdr.ScVal.scvU32(i))(storageKey.values[2]));
+            break;
+    case "GlyphOffer":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphOffer"));
-            res.push(...((i) => [
-                ((i) => xdr.ScVal.scvBytes(i))(i[0])
-            ])(storageKey.values));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
             break;
-        case "AssetOffer":
+    case "AssetOffer":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("AssetOffer"));
-            res.push(...((i) => [
-                ((i) => AssetOfferToXdr(i))(i[0])
-            ])(storageKey.values));
-            break;
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[1]));
+            res.push(((i)=>i128ToScVal(i))(storageKey.values[2]));
+            break;  
     }
     return xdr.ScVal.scvVec(res);
 }
@@ -357,81 +524,78 @@ function StorageKeyFromXdr(base64Xdr: string): StorageKey {
     return { tag, values } as StorageKey;
 }
 
-export interface MinerColorAmount {
-    0: Address;
-    1: u32;
-    2: u32;
-}
+export type HashId = {tag: "Id", values: [u64]} | {tag: "Hash", values: [Buffer]};
 
-function MinerColorAmountToXdr(minerColorAmount?: MinerColorAmount): xdr.ScVal {
-    if (!minerColorAmount) {
+function HashIdToXdr(hashId?: HashId): xdr.ScVal {
+    if (!hashId) {
         return xdr.ScVal.scvVoid();
     }
-    // let arr = [
-    //     new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("0"), val: ((i) => addressToScVal(i))(minerColorAmount["0"]) }),
-    //     new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("1"), val: ((i) => xdr.ScVal.scvU32(i))(minerColorAmount["1"]) }),
-    //     new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("2"), val: ((i) => xdr.ScVal.scvU32(i))(minerColorAmount["2"]) })
-    // ];
-    // return xdr.ScVal.scvMap(arr);
-    return xdr.ScVal.scvVec([
-        ((i) => addressToScVal(i))(minerColorAmount["0"]),
-        ((i) => xdr.ScVal.scvU32(i))(minerColorAmount["1"]),
-        ((i) => xdr.ScVal.scvU32(i))(minerColorAmount["2"])
-    ])
-}
-
-
-function MinerColorAmountFromXdr(base64Xdr: string): MinerColorAmount {
-    let scVal = strToScVal(base64Xdr);
-    let obj: [string, any][] = scVal.map()!.map(e => [e.key().str() as string, e.val()]);
-    let map = new Map<string, any>(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
+    let res: xdr.ScVal[] = [];
+    switch (hashId.tag) {
+        case "Id":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Id"));
+            res.push(((i)=>xdr.ScVal.scvU64(xdr.Uint64.fromString(i.toString())))(hashId.values[0]));
+            break;
+    case "Hash":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Hash"));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(hashId.values[0]));
+            break;  
     }
-    return {
-        0: scValToJs(map.get("0")) as unknown as Address,
-        1: scValToJs(map.get("1")) as unknown as u32,
-        2: scValToJs(map.get("2")) as unknown as u32
-    };
+    return xdr.ScVal.scvVec(res);
 }
 
-export interface MinerOwnerColor {
-    0: Address;
-    1: Address;
-    2: u32;
+function HashIdFromXdr(base64Xdr: string): HashId {
+    type Tag = HashId["tag"];
+    type Value = HashId["values"];
+    let [tag, values] = strToScVal(base64Xdr).vec()!.map(scValToJs) as [Tag, Value];
+    if (!tag) {
+        throw new Error('Missing enum tag when decoding HashId from XDR');
+    }
+    return { tag, values } as HashId;
 }
 
-function MinerOwnerColorToXdr(minerOwnerColor?: MinerOwnerColor): xdr.ScVal {
-    if (!minerOwnerColor) {
+export type GlyphType = {tag: "Glyph", values: [Glyph]} | {tag: "Colors", values: [Map<Address, Map<u32, Array<u32>>>]};
+
+function GlyphTypeToXdr(glyphType?: GlyphType): xdr.ScVal {
+    if (!glyphType) {
         return xdr.ScVal.scvVoid();
     }
-    let arr = [
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("0"), val: ((i) => addressToScVal(i))(minerOwnerColor["0"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("1"), val: ((i) => addressToScVal(i))(minerOwnerColor["1"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("2"), val: ((i) => xdr.ScVal.scvU32(i))(minerOwnerColor["2"]) })
-    ];
-    return xdr.ScVal.scvMap(arr);
+    let res: xdr.ScVal[] = [];
+    switch (glyphType.tag) {
+        case "Glyph":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
+            res.push(((i)=>GlyphToXdr(i))(glyphType.values[0]));
+            break;
+    case "Colors":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
+            res.push(((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>addressToScVal(i))(key),
+                val: ((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>xdr.ScVal.scvU32(i))(key),
+                val: ((i)=>xdr.ScVal.scvVec(i.map((i)=>xdr.ScVal.scvU32(i))))(value)})
+          })))(value)})
+          })))(glyphType.values[0]));
+            break;  
+    }
+    return xdr.ScVal.scvVec(res);
 }
 
-
-function MinerOwnerColorFromXdr(base64Xdr: string): MinerOwnerColor {
-    let scVal = strToScVal(base64Xdr);
-    let obj: [string, any][] = scVal.map()!.map(e => [e.key().str() as string, e.val()]);
-    let map = new Map<string, any>(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
+function GlyphTypeFromXdr(base64Xdr: string): GlyphType {
+    type Tag = GlyphType["tag"];
+    type Value = GlyphType["values"];
+    let [tag, values] = strToScVal(base64Xdr).vec()!.map(scValToJs) as [Tag, Value];
+    if (!tag) {
+        throw new Error('Missing enum tag when decoding GlyphType from XDR');
     }
-    return {
-        0: scValToJs(map.get("0")) as unknown as Address,
-        1: scValToJs(map.get("1")) as unknown as Address,
-        2: scValToJs(map.get("2")) as unknown as u32
-    };
+    return { tag, values } as GlyphType;
 }
 
 export interface Glyph {
-    colors: Array<[Address, Array<[u32, Array<u32>]>]>;
-    length: u32;
-    width: u32;
+  colors: Map<Address, Map<u32, Array<u32>>>;
+  length: u32;
+  width: u32;
 }
 
 function GlyphToXdr(glyph?: Glyph): xdr.ScVal {
@@ -439,18 +603,18 @@ function GlyphToXdr(glyph?: Glyph): xdr.ScVal {
         return xdr.ScVal.scvVoid();
     }
     let arr = [
-        new xdr.ScMapEntry({
-            key: ((i) => xdr.ScVal.scvSymbol(i))("colors"), val: ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvVec([
-                ((i) => addressToScVal(i))(i[0]),
-                ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvVec([
-                    ((i) => xdr.ScVal.scvU32(i))(i[0]),
-                    ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvU32(i))))(i[1])
-                ]))))(i[1])
-            ]))))(glyph["colors"])
-        }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("length"), val: ((i) => xdr.ScVal.scvU32(i))(glyph["length"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("width"), val: ((i) => xdr.ScVal.scvU32(i))(glyph["width"]) })
-    ];
+        new xdr.ScMapEntry({key: ((i)=>xdr.ScVal.scvSymbol(i))("colors"), val: ((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>addressToScVal(i))(key),
+                val: ((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            return new xdr.ScMapEntry({
+                key: ((i)=>xdr.ScVal.scvU32(i))(key),
+                val: ((i)=>xdr.ScVal.scvVec(i.map((i)=>xdr.ScVal.scvU32(i))))(value)})
+          })))(value)})
+          })))(glyph["colors"])}),
+        new xdr.ScMapEntry({key: ((i)=>xdr.ScVal.scvSymbol(i))("length"), val: ((i)=>xdr.ScVal.scvU32(i))(glyph["length"])}),
+        new xdr.ScMapEntry({key: ((i)=>xdr.ScVal.scvSymbol(i))("width"), val: ((i)=>xdr.ScVal.scvU32(i))(glyph["width"])})
+        ];
     return xdr.ScVal.scvMap(arr);
 }
 
@@ -463,13 +627,13 @@ function GlyphFromXdr(base64Xdr: string): Glyph {
         throw new Error('Invalid XDR');
     }
     return {
-        colors: scValToJs(map.get("colors")) as unknown as Array<[Address, Array<[u32, Array<u32>]>]>,
+        colors: scValToJs(map.get("colors")) as unknown as Map<Address, Map<u32, Array<u32>>>,
         length: scValToJs(map.get("length")) as unknown as u32,
         width: scValToJs(map.get("width")) as unknown as u32
     };
 }
 
-export type OfferType = { tag: "Glyph", values: [Buffer] } | { tag: "Asset", values: [AssetAmount] };
+export type OfferType = {tag: "Glyph", values: [Buffer]} | {tag: "Asset", values: [Address, i128]};
 
 function OfferTypeToXdr(offerType?: OfferType): xdr.ScVal {
     if (!offerType) {
@@ -479,16 +643,13 @@ function OfferTypeToXdr(offerType?: OfferType): xdr.ScVal {
     switch (offerType.tag) {
         case "Glyph":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(...((i) => [
-                ((i) => xdr.ScVal.scvBytes(i))(i[0])
-            ])(offerType.values));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(offerType.values[0]));
             break;
-        case "Asset":
+    case "Asset":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(...((i) => [
-                ((i) => AssetAmountToXdr(i))(i[0])
-            ])(offerType.values));
-            break;
+            res.push(((i)=>addressToScVal(i))(offerType.values[0]));
+            res.push(((i)=>i128ToScVal(i))(offerType.values[1]));
+            break;  
     }
     return xdr.ScVal.scvVec(res);
 }
@@ -503,7 +664,7 @@ function OfferTypeFromXdr(base64Xdr: string): OfferType {
     return { tag, values } as OfferType;
 }
 
-export type Offer = { tag: "Glyph", values: [GlyphOfferArg] } | { tag: "Asset", values: [AssetOfferArg] };
+export type Offer = {tag: "Glyph", values: [u32, Array<OfferType>, Address, Buffer]} | {tag: "Asset", values: [Array<Address>, Buffer, Address, i128]};
 
 function OfferToXdr(offer?: Offer): xdr.ScVal {
     if (!offer) {
@@ -513,16 +674,18 @@ function OfferToXdr(offer?: Offer): xdr.ScVal {
     switch (offer.tag) {
         case "Glyph":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(...((i) => [
-                ((i) => GlyphOfferArgToXdr(i))(i[0])
-            ])(offer.values));
+            res.push(((i)=>xdr.ScVal.scvU32(i))(offer.values[0]));
+            res.push(((i)=>xdr.ScVal.scvVec(i.map((i)=>OfferTypeToXdr(i))))(offer.values[1]));
+            res.push(((i)=>addressToScVal(i))(offer.values[2]));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(offer.values[3]));
             break;
-        case "Asset":
+    case "Asset":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(...((i) => [
-                ((i) => AssetOfferArgToXdr(i))(i[0])
-            ])(offer.values));
-            break;
+            res.push(((i)=>xdr.ScVal.scvVec(i.map((i)=>addressToScVal(i))))(offer.values[0]));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(offer.values[1]));
+            res.push(((i)=>addressToScVal(i))(offer.values[2]));
+            res.push(((i)=>i128ToScVal(i))(offer.values[3]));
+            break;  
     }
     return xdr.ScVal.scvVec(res);
 }
@@ -535,137 +698,4 @@ function OfferFromXdr(base64Xdr: string): Offer {
         throw new Error('Missing enum tag when decoding Offer from XDR');
     }
     return { tag, values } as Offer;
-}
-
-export interface GlyphOfferArg {
-    0: u32;
-    1: Array<OfferType>;
-    2: Address;
-    3: Buffer;
-}
-
-function GlyphOfferArgToXdr(glyphOfferArg?: GlyphOfferArg): xdr.ScVal {
-    if (!glyphOfferArg) {
-        return xdr.ScVal.scvVoid();
-    }
-    let arr = [
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("0"), val: ((i) => xdr.ScVal.scvU32(i))(glyphOfferArg["0"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("1"), val: ((i) => xdr.ScVal.scvVec(i.map((i) => OfferTypeToXdr(i))))(glyphOfferArg["1"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("2"), val: ((i) => addressToScVal(i))(glyphOfferArg["2"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("3"), val: ((i) => xdr.ScVal.scvBytes(i))(glyphOfferArg["3"]) })
-    ];
-    return xdr.ScVal.scvMap(arr);
-}
-
-
-function GlyphOfferArgFromXdr(base64Xdr: string): GlyphOfferArg {
-    let scVal = strToScVal(base64Xdr);
-    let obj: [string, any][] = scVal.map()!.map(e => [e.key().str() as string, e.val()]);
-    let map = new Map<string, any>(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
-    }
-    return {
-        0: scValToJs(map.get("0")) as unknown as u32,
-        1: scValToJs(map.get("1")) as unknown as Array<OfferType>,
-        2: scValToJs(map.get("2")) as unknown as Address,
-        3: scValToJs(map.get("3")) as unknown as Buffer
-    };
-}
-
-export interface AssetOfferArg {
-    0: Array<Address>;
-    1: AssetOffer;
-}
-
-function AssetOfferArgToXdr(assetOfferArg?: AssetOfferArg): xdr.ScVal {
-    if (!assetOfferArg) {
-        return xdr.ScVal.scvVoid();
-    }
-    let arr = [
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("0"), val: ((i) => xdr.ScVal.scvVec(i.map((i) => addressToScVal(i))))(assetOfferArg["0"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("1"), val: ((i) => AssetOfferToXdr(i))(assetOfferArg["1"]) })
-    ];
-    return xdr.ScVal.scvMap(arr);
-}
-
-
-function AssetOfferArgFromXdr(base64Xdr: string): AssetOfferArg {
-    let scVal = strToScVal(base64Xdr);
-    let obj: [string, any][] = scVal.map()!.map(e => [e.key().str() as string, e.val()]);
-    let map = new Map<string, any>(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
-    }
-    return {
-        0: scValToJs(map.get("0")) as unknown as Array<Address>,
-        1: scValToJs(map.get("1")) as unknown as AssetOffer
-    };
-}
-
-export interface AssetOffer {
-    0: Buffer;
-    1: Address;
-    2: i128;
-}
-
-function AssetOfferToXdr(assetOffer?: AssetOffer): xdr.ScVal {
-    if (!assetOffer) {
-        return xdr.ScVal.scvVoid();
-    }
-    let arr = [
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("0"), val: ((i) => xdr.ScVal.scvBytes(i))(assetOffer["0"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("1"), val: ((i) => addressToScVal(i))(assetOffer["1"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("2"), val: ((i) => i128ToScVal(i))(assetOffer["2"]) })
-    ];
-    return xdr.ScVal.scvMap(arr);
-}
-
-
-function AssetOfferFromXdr(base64Xdr: string): AssetOffer {
-    let scVal = strToScVal(base64Xdr);
-    let obj: [string, any][] = scVal.map()!.map(e => [e.key().str() as string, e.val()]);
-    let map = new Map<string, any>(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
-    }
-    return {
-        0: scValToJs(map.get("0")) as unknown as Buffer,
-        1: scValToJs(map.get("1")) as unknown as Address,
-        2: scValToJs(map.get("2")) as unknown as i128
-    };
-}
-
-export interface AssetAmount {
-    0: Address;
-    1: i128;
-}
-
-function AssetAmountToXdr(assetAmount?: AssetAmount): xdr.ScVal {
-    if (!assetAmount) {
-        return xdr.ScVal.scvVoid();
-    }
-    // let arr = [
-    //     new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("0"), val: ((i) => addressToScVal(i))(assetAmount["0"]) }),
-    //     new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("1"), val: ((i) => i128ToScVal(i))(assetAmount["1"]) })
-    // ];
-    // return xdr.ScVal.scvMap(arr);
-    return xdr.ScVal.scvVec([
-        ((i) => addressToScVal(i))(assetAmount["0"]),
-        ((i) => i128ToScVal(i))(assetAmount["1"])
-    ]);
-}
-
-
-function AssetAmountFromXdr(base64Xdr: string): AssetAmount {
-    let scVal = strToScVal(base64Xdr);
-    let obj: [string, any][] = scVal.map()!.map(e => [e.key().str() as string, e.val()]);
-    let map = new Map<string, any>(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
-    }
-    return {
-        0: scValToJs(map.get("0")) as unknown as Address,
-        1: scValToJs(map.get("1")) as unknown as i128
-    };
 }
