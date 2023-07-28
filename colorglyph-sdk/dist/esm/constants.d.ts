@@ -1,7 +1,7 @@
 /**
  * The Soroban contract ID for the colorglyph-sdk contract.
  */
-export declare const CONTRACT_ID = "CB4BKPEWXQYKCIQYJJNIOLDFAYXZ3CLPPRGE5ORBVQRSLH7JV47FGFHN";
+export declare const CONTRACT_ID = "CAMSMKKWJA2KOSYLY676V2YDXKK5P6LWI52MFREBGBLXVUXXXP7JHJKE";
 /**
  * The Soroban contract ID for the colorglyph-sdk contract, in hex.
  * If {@link CONTRACT_ID} is a new-style `C…` string, you will need this hex

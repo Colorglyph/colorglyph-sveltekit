@@ -3,7 +3,7 @@ import { Contract } from 'soroban-client'
 /**
  * The Soroban contract ID for the colorglyph-sdk contract.
  */
-export const CONTRACT_ID = 'CB4BKPEWXQYKCIQYJJNIOLDFAYXZ3CLPPRGE5ORBVQRSLH7JV47FGFHN'
+export const CONTRACT_ID = 'CAMSMKKWJA2KOSYLY676V2YDXKK5P6LWI52MFREBGBLXVUXXXP7JHJKE'
 
 /**
  * The Soroban contract ID for the colorglyph-sdk contract, in hex.

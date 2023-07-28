@@ -2,7 +2,7 @@ import { Contract } from 'soroban-client';
 /**
  * The Soroban contract ID for the colorglyph-sdk contract.
  */
-export const CONTRACT_ID = 'CAMSMKKWJA2KOSYLY676V2YDXKK5P6LWI52MFREBGBLXVUXXXP7JHJKE';
+export const CONTRACT_ID = 'CCKMEM4LCIJAWEBEYBB2DKJVLLVRCDVBVSKJZ6WPRSD7CR2B6UDMQ7AG';
 /**
  * The Soroban contract ID for the colorglyph-sdk contract, in hex.
  * If {@link CONTRACT_ID} is a new-style `C…` string, you will need this hex
