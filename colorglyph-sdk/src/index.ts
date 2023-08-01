@@ -3,7 +3,7 @@ import { xdr } from 'soroban-client';
 import { Buffer } from "buffer";
 import { scValStrToJs, scValToJs, addressToScVal, u128ToScVal, i128ToScVal, strToScVal } from './convert.js';
 import { invoke } from './invoke.js';
-import { ResponseTypes } from './method-options.js'
+import type { ResponseTypes, Wallet } from './method-options.js'
 
 export * from './constants.js'
 export * from './server.js'
@@ -108,6 +108,16 @@ export async function initialize<R extends ResponseTypes = undefined>({token_add
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'initialize',
@@ -135,6 +145,16 @@ export async function colorsMine<R extends ResponseTypes = undefined>({miner, to
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'colors_mine',
@@ -167,6 +187,16 @@ export async function colorsTransfer<R extends ResponseTypes = undefined>({from,
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'colors_transfer',
@@ -197,6 +227,16 @@ export async function colorBalance<R extends ResponseTypes = undefined>({owner, 
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'color_balance',
@@ -210,7 +250,7 @@ export async function colorBalance<R extends ResponseTypes = undefined>({owner, 
     });
 }
 
-export async function glyphMint<R extends ResponseTypes = undefined>({minter, to, colors, width, id}: {minter: Address, to: Option<Address>, colors: Option<Map<Address, Map<u32, Array<u32>>>>, width: Option<u32>, id: Option<u64>}, options: {
+export async function glyphMint<R extends ResponseTypes = undefined>({minter, to, colors, width}: {minter: Address, to: Option<Address>, colors: Map<Address, Map<u32, Array<u32>>>, width: Option<u32>}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -218,7 +258,7 @@ export async function glyphMint<R extends ResponseTypes = undefined>({minter, to
   /**
    * What type of response to return.
    *
-   *   - `undefined`, the default, parses the returned XDR as `HashId`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `undefined`, the default, parses the returned XDR as `Option<Buffer>`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
    *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
    *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
    */
@@ -227,12 +267,22 @@ export async function glyphMint<R extends ResponseTypes = undefined>({minter, to
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'glyph_mint',
         args: [((i) => addressToScVal(i))(minter),
         ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+        ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
             return new xdr.ScMapEntry({
                 key: ((i)=>addressToScVal(i))(key),
                 val: ((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
@@ -241,16 +291,15 @@ export async function glyphMint<R extends ResponseTypes = undefined>({minter, to
                 val: ((i)=>xdr.ScVal.scvVec(i.map((i)=>xdr.ScVal.scvU32(i))))(value)})
           })))(value)})
           })))(colors),
-        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvU32(i))(width),
-        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvU64(xdr.Uint64.fromString(i.toString())))(id)],
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvU32(i))(width)],
         ...options,
-        parseResultXdr: (xdr): HashId => {
-            return HashIdFromXdr(xdr);
+        parseResultXdr: (xdr): Option<Buffer> => {
+            return scValStrToJs(xdr);
         },
     });
 }
 
-export async function glyphTransfer<R extends ResponseTypes = undefined>({from, to, hash_id}: {from: Address, to: Address, hash_id: HashId}, options: {
+export async function glyphTransfer<R extends ResponseTypes = undefined>({to, hash_type}: {to: Address, hash_type: HashType}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -258,7 +307,7 @@ export async function glyphTransfer<R extends ResponseTypes = undefined>({from, 
   /**
    * What type of response to return.
    *
-   *   - `undefined`, the default, parses the returned XDR as `Option<u64>`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
    *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
    *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
    */
@@ -267,20 +316,27 @@ export async function glyphTransfer<R extends ResponseTypes = undefined>({from, 
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'glyph_transfer',
-        args: [((i) => addressToScVal(i))(from),
-        ((i) => addressToScVal(i))(to),
-        ((i) => HashIdToXdr(i))(hash_id)],
+        args: [((i) => addressToScVal(i))(to),
+        ((i) => HashTypeToXdr(i))(hash_type)],
         ...options,
-        parseResultXdr: (xdr): Option<u64> => {
-            return scValStrToJs(xdr);
-        },
+        parseResultXdr: () => {},
     });
 }
 
-export async function glyphScrape<R extends ResponseTypes = undefined>({owner, to, hash_id}: {owner: Address, to: Option<Address>, hash_id: HashId}, options: {
+export async function glyphScrape<R extends ResponseTypes = undefined>({to, hash_type}: {to: Option<Address>, hash_type: HashType}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -288,7 +344,7 @@ export async function glyphScrape<R extends ResponseTypes = undefined>({owner, t
   /**
    * What type of response to return.
    *
-   *   - `undefined`, the default, parses the returned XDR as `Option<u64>`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
    *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
    *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
    */
@@ -297,20 +353,27 @@ export async function glyphScrape<R extends ResponseTypes = undefined>({owner, t
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'glyph_scrape',
-        args: [((i) => addressToScVal(i))(owner),
-        ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-        ((i) => HashIdToXdr(i))(hash_id)],
+        args: [((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
+        ((i) => HashTypeToXdr(i))(hash_type)],
         ...options,
-        parseResultXdr: (xdr): Option<u64> => {
-            return scValStrToJs(xdr);
-        },
+        parseResultXdr: () => {},
     });
 }
 
-export async function glyphGet<R extends ResponseTypes = undefined>({hash_id}: {hash_id: HashId}, options: {
+export async function glyphGet<R extends ResponseTypes = undefined>({hash_type}: {hash_type: HashType}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -327,10 +390,20 @@ export async function glyphGet<R extends ResponseTypes = undefined>({hash_id}: {
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'glyph_get',
-        args: [((i) => HashIdToXdr(i))(hash_id)],
+        args: [((i) => HashTypeToXdr(i))(hash_type)],
         ...options,
         parseResultXdr: (xdr): Ok<GlyphType> | Err<Error_> | undefined => {
             try {
@@ -348,7 +421,7 @@ export async function glyphGet<R extends ResponseTypes = undefined>({hash_id}: {
     });
 }
 
-export async function offerPost<R extends ResponseTypes = undefined>({seller, sell, buy}: {seller: Address, sell: OfferType, buy: OfferType}, options: {
+export async function offerPost<R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Offer}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -365,12 +438,21 @@ export async function offerPost<R extends ResponseTypes = undefined>({seller, se
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'offer_post',
-        args: [((i) => addressToScVal(i))(seller),
-        ((i) => OfferTypeToXdr(i))(sell),
-        ((i) => OfferTypeToXdr(i))(buy)],
+        args: [((i) => OfferToXdr(i))(sell),
+        ((i) => OfferToXdr(i))(buy)],
         ...options,
         parseResultXdr: (xdr): Ok<void> | Err<Error_> | undefined => {
             try {
@@ -388,7 +470,7 @@ export async function offerPost<R extends ResponseTypes = undefined>({seller, se
     });
 }
 
-export async function offerDelete<R extends ResponseTypes = undefined>({seller, sell, buy}: {seller: Address, sell: OfferType, buy: OfferType}, options: {
+export async function offerDelete<R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Option<Offer>}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -396,7 +478,7 @@ export async function offerDelete<R extends ResponseTypes = undefined>({seller, 
   /**
    * What type of response to return.
    *
-   *   - `undefined`, the default, parses the returned XDR as `void`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `undefined`, the default, parses the returned XDR as `Ok<void> | Err<Error_> | undefined`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
    *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
    *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
    */
@@ -405,18 +487,39 @@ export async function offerDelete<R extends ResponseTypes = undefined>({seller, 
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'offer_delete',
-        args: [((i) => addressToScVal(i))(seller),
-        ((i) => OfferTypeToXdr(i))(sell),
-        ((i) => OfferTypeToXdr(i))(buy)],
+        args: [((i) => OfferToXdr(i))(sell),
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : OfferToXdr(i))(buy)],
         ...options,
-        parseResultXdr: () => {},
+        parseResultXdr: (xdr): Ok<void> | Err<Error_> | undefined => {
+            try {
+                return new Ok(scValStrToJs(xdr));
+            } catch (e) {
+                //@ts-ignore
+                let err = getError(e.message);
+                if (err) {
+                    return err;
+                } else {
+                    throw e;
+                }
+            }
+        },
     });
 }
 
-export async function offersGet<R extends ResponseTypes = undefined>({sell, buy}: {sell: OfferType, buy: OfferType}, options: {
+export async function offersGet<R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Option<Offer>}, options: {
   /**
    * The fee to pay for the transaction. Default: 100.
    */
@@ -424,7 +527,7 @@ export async function offersGet<R extends ResponseTypes = undefined>({sell, buy}
   /**
    * What type of response to return.
    *
-   *   - `undefined`, the default, parses the returned XDR as `Ok<Offer> | Err<Error_> | undefined`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
+   *   - `undefined`, the default, parses the returned XDR as `Ok<void> | Err<Error_> | undefined`. Runs preflight, checks to see if auth/signing is required, and sends the transaction if so. If there's no error and `secondsToWait` is positive, awaits the finalized transaction.
    *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
    *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
    */
@@ -433,13 +536,23 @@ export async function offersGet<R extends ResponseTypes = undefined>({sell, buy}
    * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
    */
   secondsToWait?: number
+  /**
+   * A Wallet interface, such as Freighter, that has the methods `isConnected`, `isAllowed`, `getUserInfo`, and `signTransaction`. If not provided, will attempt to import and use Freighter. Example:
+   *
+   * ```ts
+   * import freighter from "@stellar/freighter-api";
+   *
+   * // later, when calling this function:
+   *   wallet: freighter,
+   */
+  wallet?: Wallet
 } = {}) {
     return await invoke({
         method: 'offers_get',
-        args: [((i) => OfferTypeToXdr(i))(sell),
-        ((i) => OfferTypeToXdr(i))(buy)],
+        args: [((i) => OfferToXdr(i))(sell),
+        ((i) => (!i) ? xdr.ScVal.scvVoid() : OfferToXdr(i))(buy)],
         ...options,
-        parseResultXdr: (xdr): Ok<Offer> | Err<Error_> | undefined => {
+        parseResultXdr: (xdr): Ok<void> | Err<Error_> | undefined => {
             try {
                 return new Ok(scValStrToJs(xdr));
             } catch (e) {
@@ -462,9 +575,10 @@ const Errors = [
   {message:""},
   {message:""},
   {message:""},
+  {message:""},
   {message:""}
 ]
-export type StorageKey = {tag: "TokenAddress", values: void} | {tag: "FeeAddress", values: void} | {tag: "Colors", values: [u64]} | {tag: "Glyph", values: [Buffer]} | {tag: "GlyphOwner", values: [Buffer]} | {tag: "GlyphMinter", values: [Buffer]} | {tag: "Color", values: [Address, Address, u32]} | {tag: "GlyphOffer", values: [Buffer]} | {tag: "AssetOffer", values: [Buffer, Address, i128]};
+export type StorageKey = {tag: "TokenAddress", values: void} | {tag: "FeeAddress", values: void} | {tag: "Color", values: [Address, Address, u32]} | {tag: "Colors", values: [Address]} | {tag: "Glyph", values: [Buffer]} | {tag: "Dust", values: [Address]} | {tag: "GlyphOwner", values: [Buffer]} | {tag: "GlyphMinter", values: [Buffer]} | {tag: "GlyphOffer", values: [Buffer]} | {tag: "AssetOffer", values: [Buffer, Address, i128]};
 
 function StorageKeyToXdr(storageKey?: StorageKey): xdr.ScVal {
     if (!storageKey) {
@@ -478,13 +592,23 @@ function StorageKeyToXdr(storageKey?: StorageKey): xdr.ScVal {
     case "FeeAddress":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("FeeAddress"));
             break;
+    case "Color":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Color"));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[0]));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[1]));
+            res.push(((i)=>xdr.ScVal.scvU32(i))(storageKey.values[2]));
+            break;
     case "Colors":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
-            res.push(((i)=>xdr.ScVal.scvU64(xdr.Uint64.fromString(i.toString())))(storageKey.values[0]));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[0]));
             break;
     case "Glyph":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
             res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
+            break;
+    case "Dust":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Dust"));
+            res.push(((i)=>addressToScVal(i))(storageKey.values[0]));
             break;
     case "GlyphOwner":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphOwner"));
@@ -493,12 +617,6 @@ function StorageKeyToXdr(storageKey?: StorageKey): xdr.ScVal {
     case "GlyphMinter":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphMinter"));
             res.push(((i)=>xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            break;
-    case "Color":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Color"));
-            res.push(((i)=>addressToScVal(i))(storageKey.values[0]));
-            res.push(((i)=>addressToScVal(i))(storageKey.values[1]));
-            res.push(((i)=>xdr.ScVal.scvU32(i))(storageKey.values[2]));
             break;
     case "GlyphOffer":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphOffer"));
@@ -524,37 +642,41 @@ function StorageKeyFromXdr(base64Xdr: string): StorageKey {
     return { tag, values } as StorageKey;
 }
 
-export type HashId = {tag: "Id", values: [u64]} | {tag: "Hash", values: [Buffer]};
+export type HashType = {tag: "Colors", values: [Address]} | {tag: "Dust", values: [Address]} | {tag: "Glyph", values: [Buffer]};
 
-function HashIdToXdr(hashId?: HashId): xdr.ScVal {
-    if (!hashId) {
+function HashTypeToXdr(hashType?: HashType): xdr.ScVal {
+    if (!hashType) {
         return xdr.ScVal.scvVoid();
     }
     let res: xdr.ScVal[] = [];
-    switch (hashId.tag) {
-        case "Id":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Id"));
-            res.push(((i)=>xdr.ScVal.scvU64(xdr.Uint64.fromString(i.toString())))(hashId.values[0]));
+    switch (hashType.tag) {
+        case "Colors":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
+            res.push(((i)=>addressToScVal(i))(hashType.values[0]));
             break;
-    case "Hash":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Hash"));
-            res.push(((i)=>xdr.ScVal.scvBytes(i))(hashId.values[0]));
+    case "Dust":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Dust"));
+            res.push(((i)=>addressToScVal(i))(hashType.values[0]));
+            break;
+    case "Glyph":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(hashType.values[0]));
             break;  
     }
     return xdr.ScVal.scvVec(res);
 }
 
-function HashIdFromXdr(base64Xdr: string): HashId {
-    type Tag = HashId["tag"];
-    type Value = HashId["values"];
+function HashTypeFromXdr(base64Xdr: string): HashType {
+    type Tag = HashType["tag"];
+    type Value = HashType["values"];
     let [tag, values] = strToScVal(base64Xdr).vec()!.map(scValToJs) as [Tag, Value];
     if (!tag) {
-        throw new Error('Missing enum tag when decoding HashId from XDR');
+        throw new Error('Missing enum tag when decoding HashType from XDR');
     }
-    return { tag, values } as HashId;
+    return { tag, values } as HashType;
 }
 
-export type GlyphType = {tag: "Glyph", values: [Glyph]} | {tag: "Colors", values: [Map<Address, Map<u32, Array<u32>>>]};
+export type GlyphType = {tag: "Colors", values: [Map<Address, Map<u32, Array<u32>>>]} | {tag: "Glyph", values: [Glyph]};
 
 function GlyphTypeToXdr(glyphType?: GlyphType): xdr.ScVal {
     if (!glyphType) {
@@ -562,11 +684,7 @@ function GlyphTypeToXdr(glyphType?: GlyphType): xdr.ScVal {
     }
     let res: xdr.ScVal[] = [];
     switch (glyphType.tag) {
-        case "Glyph":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i)=>GlyphToXdr(i))(glyphType.values[0]));
-            break;
-    case "Colors":
+        case "Colors":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
             res.push(((i)=>xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
             return new xdr.ScMapEntry({
@@ -577,6 +695,10 @@ function GlyphTypeToXdr(glyphType?: GlyphType): xdr.ScVal {
                 val: ((i)=>xdr.ScVal.scvVec(i.map((i)=>xdr.ScVal.scvU32(i))))(value)})
           })))(value)})
           })))(glyphType.values[0]));
+            break;
+    case "Glyph":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
+            res.push(((i)=>GlyphToXdr(i))(glyphType.values[0]));
             break;  
     }
     return xdr.ScVal.scvVec(res);
@@ -633,38 +755,41 @@ function GlyphFromXdr(base64Xdr: string): Glyph {
     };
 }
 
-export type OfferType = {tag: "Glyph", values: [Buffer]} | {tag: "Asset", values: [Address, i128]};
+export type OfferCreate = {tag: "Glyph", values: [Buffer, Offer]} | {tag: "Asset", values: [Buffer, Address, Address, i128]};
 
-function OfferTypeToXdr(offerType?: OfferType): xdr.ScVal {
-    if (!offerType) {
+function OfferCreateToXdr(offerCreate?: OfferCreate): xdr.ScVal {
+    if (!offerCreate) {
         return xdr.ScVal.scvVoid();
     }
     let res: xdr.ScVal[] = [];
-    switch (offerType.tag) {
+    switch (offerCreate.tag) {
         case "Glyph":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i)=>xdr.ScVal.scvBytes(i))(offerType.values[0]));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(offerCreate.values[0]));
+            res.push(((i)=>OfferToXdr(i))(offerCreate.values[1]));
             break;
     case "Asset":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(((i)=>addressToScVal(i))(offerType.values[0]));
-            res.push(((i)=>i128ToScVal(i))(offerType.values[1]));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(offerCreate.values[0]));
+            res.push(((i)=>addressToScVal(i))(offerCreate.values[1]));
+            res.push(((i)=>addressToScVal(i))(offerCreate.values[2]));
+            res.push(((i)=>i128ToScVal(i))(offerCreate.values[3]));
             break;  
     }
     return xdr.ScVal.scvVec(res);
 }
 
-function OfferTypeFromXdr(base64Xdr: string): OfferType {
-    type Tag = OfferType["tag"];
-    type Value = OfferType["values"];
+function OfferCreateFromXdr(base64Xdr: string): OfferCreate {
+    type Tag = OfferCreate["tag"];
+    type Value = OfferCreate["values"];
     let [tag, values] = strToScVal(base64Xdr).vec()!.map(scValToJs) as [Tag, Value];
     if (!tag) {
-        throw new Error('Missing enum tag when decoding OfferType from XDR');
+        throw new Error('Missing enum tag when decoding OfferCreate from XDR');
     }
-    return { tag, values } as OfferType;
+    return { tag, values } as OfferCreate;
 }
 
-export type Offer = {tag: "Glyph", values: [u32, Array<OfferType>, Address, Buffer]} | {tag: "Asset", values: [Array<Address>, Buffer, Address, i128]};
+export type Offer = {tag: "Glyph", values: [Buffer]} | {tag: "Asset", values: [Address, i128]} | {tag: "AssetSell", values: [Address, Address, i128]};
 
 function OfferToXdr(offer?: Offer): xdr.ScVal {
     if (!offer) {
@@ -674,17 +799,18 @@ function OfferToXdr(offer?: Offer): xdr.ScVal {
     switch (offer.tag) {
         case "Glyph":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i)=>xdr.ScVal.scvU32(i))(offer.values[0]));
-            res.push(((i)=>xdr.ScVal.scvVec(i.map((i)=>OfferTypeToXdr(i))))(offer.values[1]));
-            res.push(((i)=>addressToScVal(i))(offer.values[2]));
-            res.push(((i)=>xdr.ScVal.scvBytes(i))(offer.values[3]));
+            res.push(((i)=>xdr.ScVal.scvBytes(i))(offer.values[0]));
             break;
     case "Asset":
             res.push(((i) => xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(((i)=>xdr.ScVal.scvVec(i.map((i)=>addressToScVal(i))))(offer.values[0]));
-            res.push(((i)=>xdr.ScVal.scvBytes(i))(offer.values[1]));
-            res.push(((i)=>addressToScVal(i))(offer.values[2]));
-            res.push(((i)=>i128ToScVal(i))(offer.values[3]));
+            res.push(((i)=>addressToScVal(i))(offer.values[0]));
+            res.push(((i)=>i128ToScVal(i))(offer.values[1]));
+            break;
+    case "AssetSell":
+            res.push(((i) => xdr.ScVal.scvSymbol(i))("AssetSell"));
+            res.push(((i)=>addressToScVal(i))(offer.values[0]));
+            res.push(((i)=>addressToScVal(i))(offer.values[1]));
+            res.push(((i)=>i128ToScVal(i))(offer.values[2]));
             break;  
     }
     return xdr.ScVal.scvVec(res);

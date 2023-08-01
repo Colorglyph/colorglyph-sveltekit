@@ -134,12 +134,12 @@ async function colorBalance({ owner, miner, color }, options = {}) {
     });
 }
 exports.colorBalance = colorBalance;
-async function glyphMint({ minter, to, colors, width, id }, options = {}) {
+async function glyphMint({ minter, to, colors, width }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'glyph_mint',
         args: [((i) => (0, convert_js_1.addressToScVal)(i))(minter),
             ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : (0, convert_js_1.addressToScVal)(i))(to),
-            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : soroban_client_1.xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
+            ((i) => soroban_client_1.xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
                 return new soroban_client_1.xdr.ScMapEntry({
                     key: ((i) => (0, convert_js_1.addressToScVal)(i))(key),
                     val: ((i) => soroban_client_1.xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
@@ -150,45 +150,38 @@ async function glyphMint({ minter, to, colors, width, id }, options = {}) {
                     })))(value)
                 });
             })))(colors),
-            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : soroban_client_1.xdr.ScVal.scvU32(i))(width),
-            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : soroban_client_1.xdr.ScVal.scvU64(soroban_client_1.xdr.Uint64.fromString(i.toString())))(id)],
+            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : soroban_client_1.xdr.ScVal.scvU32(i))(width)],
         ...options,
         parseResultXdr: (xdr) => {
-            return HashIdFromXdr(xdr);
+            return (0, convert_js_1.scValStrToJs)(xdr);
         },
     });
 }
 exports.glyphMint = glyphMint;
-async function glyphTransfer({ from, to, hash_id }, options = {}) {
+async function glyphTransfer({ to, hash_type }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'glyph_transfer',
-        args: [((i) => (0, convert_js_1.addressToScVal)(i))(from),
-            ((i) => (0, convert_js_1.addressToScVal)(i))(to),
-            ((i) => HashIdToXdr(i))(hash_id)],
+        args: [((i) => (0, convert_js_1.addressToScVal)(i))(to),
+            ((i) => HashTypeToXdr(i))(hash_type)],
         ...options,
-        parseResultXdr: (xdr) => {
-            return (0, convert_js_1.scValStrToJs)(xdr);
-        },
+        parseResultXdr: () => { },
     });
 }
 exports.glyphTransfer = glyphTransfer;
-async function glyphScrape({ owner, to, hash_id }, options = {}) {
+async function glyphScrape({ to, hash_type }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'glyph_scrape',
-        args: [((i) => (0, convert_js_1.addressToScVal)(i))(owner),
-            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : (0, convert_js_1.addressToScVal)(i))(to),
-            ((i) => HashIdToXdr(i))(hash_id)],
+        args: [((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : (0, convert_js_1.addressToScVal)(i))(to),
+            ((i) => HashTypeToXdr(i))(hash_type)],
         ...options,
-        parseResultXdr: (xdr) => {
-            return (0, convert_js_1.scValStrToJs)(xdr);
-        },
+        parseResultXdr: () => { },
     });
 }
 exports.glyphScrape = glyphScrape;
-async function glyphGet({ hash_id }, options = {}) {
+async function glyphGet({ hash_type }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'glyph_get',
-        args: [((i) => HashIdToXdr(i))(hash_id)],
+        args: [((i) => HashTypeToXdr(i))(hash_type)],
         ...options,
         parseResultXdr: (xdr) => {
             try {
@@ -208,12 +201,11 @@ async function glyphGet({ hash_id }, options = {}) {
     });
 }
 exports.glyphGet = glyphGet;
-async function offerPost({ seller, sell, buy }, options = {}) {
+async function offerPost({ sell, buy }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'offer_post',
-        args: [((i) => (0, convert_js_1.addressToScVal)(i))(seller),
-            ((i) => OfferTypeToXdr(i))(sell),
-            ((i) => OfferTypeToXdr(i))(buy)],
+        args: [((i) => OfferToXdr(i))(sell),
+            ((i) => OfferToXdr(i))(buy)],
         ...options,
         parseResultXdr: (xdr) => {
             try {
@@ -233,22 +225,35 @@ async function offerPost({ seller, sell, buy }, options = {}) {
     });
 }
 exports.offerPost = offerPost;
-async function offerDelete({ seller, sell, buy }, options = {}) {
+async function offerDelete({ sell, buy }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'offer_delete',
-        args: [((i) => (0, convert_js_1.addressToScVal)(i))(seller),
-            ((i) => OfferTypeToXdr(i))(sell),
-            ((i) => OfferTypeToXdr(i))(buy)],
+        args: [((i) => OfferToXdr(i))(sell),
+            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : OfferToXdr(i))(buy)],
         ...options,
-        parseResultXdr: () => { },
+        parseResultXdr: (xdr) => {
+            try {
+                return new Ok((0, convert_js_1.scValStrToJs)(xdr));
+            }
+            catch (e) {
+                //@ts-ignore
+                let err = getError(e.message);
+                if (err) {
+                    return err;
+                }
+                else {
+                    throw e;
+                }
+            }
+        },
     });
 }
 exports.offerDelete = offerDelete;
 async function offersGet({ sell, buy }, options = {}) {
     return await (0, invoke_js_1.invoke)({
         method: 'offers_get',
-        args: [((i) => OfferTypeToXdr(i))(sell),
-            ((i) => OfferTypeToXdr(i))(buy)],
+        args: [((i) => OfferToXdr(i))(sell),
+            ((i) => (!i) ? soroban_client_1.xdr.ScVal.scvVoid() : OfferToXdr(i))(buy)],
         ...options,
         parseResultXdr: (xdr) => {
             try {
@@ -275,6 +280,7 @@ const Errors = [
     { message: "" },
     { message: "" },
     { message: "" },
+    { message: "" },
     { message: "" }
 ];
 function StorageKeyToXdr(storageKey) {
@@ -289,13 +295,23 @@ function StorageKeyToXdr(storageKey) {
         case "FeeAddress":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("FeeAddress"));
             break;
+        case "Color":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Color"));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(storageKey.values[0]));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(storageKey.values[1]));
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvU32(i))(storageKey.values[2]));
+            break;
         case "Colors":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Colors"));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvU64(soroban_client_1.xdr.Uint64.fromString(i.toString())))(storageKey.values[0]));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(storageKey.values[0]));
             break;
         case "Glyph":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Glyph"));
             res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(storageKey.values[0]));
+            break;
+        case "Dust":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Dust"));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(storageKey.values[0]));
             break;
         case "GlyphOwner":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("GlyphOwner"));
@@ -304,12 +320,6 @@ function StorageKeyToXdr(storageKey) {
         case "GlyphMinter":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("GlyphMinter"));
             res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            break;
-        case "Color":
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Color"));
-            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(storageKey.values[0]));
-            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(storageKey.values[1]));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvU32(i))(storageKey.values[2]));
             break;
         case "GlyphOffer":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("GlyphOffer"));
@@ -331,27 +341,31 @@ function StorageKeyFromXdr(base64Xdr) {
     }
     return { tag, values };
 }
-function HashIdToXdr(hashId) {
-    if (!hashId) {
+function HashTypeToXdr(hashType) {
+    if (!hashType) {
         return soroban_client_1.xdr.ScVal.scvVoid();
     }
     let res = [];
-    switch (hashId.tag) {
-        case "Id":
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Id"));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvU64(soroban_client_1.xdr.Uint64.fromString(i.toString())))(hashId.values[0]));
+    switch (hashType.tag) {
+        case "Colors":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Colors"));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(hashType.values[0]));
             break;
-        case "Hash":
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Hash"));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(hashId.values[0]));
+        case "Dust":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Dust"));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(hashType.values[0]));
+            break;
+        case "Glyph":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Glyph"));
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(hashType.values[0]));
             break;
     }
     return soroban_client_1.xdr.ScVal.scvVec(res);
 }
-function HashIdFromXdr(base64Xdr) {
+function HashTypeFromXdr(base64Xdr) {
     let [tag, values] = (0, convert_js_1.strToScVal)(base64Xdr).vec().map(convert_js_1.scValToJs);
     if (!tag) {
-        throw new Error('Missing enum tag when decoding HashId from XDR');
+        throw new Error('Missing enum tag when decoding HashType from XDR');
     }
     return { tag, values };
 }
@@ -361,10 +375,6 @@ function GlyphTypeToXdr(glyphType) {
     }
     let res = [];
     switch (glyphType.tag) {
-        case "Glyph":
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => GlyphToXdr(i))(glyphType.values[0]));
-            break;
         case "Colors":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Colors"));
             res.push(((i) => soroban_client_1.xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
@@ -378,6 +388,10 @@ function GlyphTypeToXdr(glyphType) {
                     })))(value)
                 });
             })))(glyphType.values[0]));
+            break;
+        case "Glyph":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Glyph"));
+            res.push(((i) => GlyphToXdr(i))(glyphType.values[0]));
             break;
     }
     return soroban_client_1.xdr.ScVal.scvVec(res);
@@ -423,28 +437,31 @@ function GlyphFromXdr(base64Xdr) {
         width: (0, convert_js_1.scValToJs)(map.get("width"))
     };
 }
-function OfferTypeToXdr(offerType) {
-    if (!offerType) {
+function OfferCreateToXdr(offerCreate) {
+    if (!offerCreate) {
         return soroban_client_1.xdr.ScVal.scvVoid();
     }
     let res = [];
-    switch (offerType.tag) {
+    switch (offerCreate.tag) {
         case "Glyph":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(offerType.values[0]));
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(offerCreate.values[0]));
+            res.push(((i) => OfferToXdr(i))(offerCreate.values[1]));
             break;
         case "Asset":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offerType.values[0]));
-            res.push(((i) => (0, convert_js_1.i128ToScVal)(i))(offerType.values[1]));
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(offerCreate.values[0]));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offerCreate.values[1]));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offerCreate.values[2]));
+            res.push(((i) => (0, convert_js_1.i128ToScVal)(i))(offerCreate.values[3]));
             break;
     }
     return soroban_client_1.xdr.ScVal.scvVec(res);
 }
-function OfferTypeFromXdr(base64Xdr) {
+function OfferCreateFromXdr(base64Xdr) {
     let [tag, values] = (0, convert_js_1.strToScVal)(base64Xdr).vec().map(convert_js_1.scValToJs);
     if (!tag) {
-        throw new Error('Missing enum tag when decoding OfferType from XDR');
+        throw new Error('Missing enum tag when decoding OfferCreate from XDR');
     }
     return { tag, values };
 }
@@ -456,17 +473,18 @@ function OfferToXdr(offer) {
     switch (offer.tag) {
         case "Glyph":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvU32(i))(offer.values[0]));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvVec(i.map((i) => OfferTypeToXdr(i))))(offer.values[1]));
-            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offer.values[2]));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(offer.values[3]));
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(offer.values[0]));
             break;
         case "Asset":
             res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvVec(i.map((i) => (0, convert_js_1.addressToScVal)(i))))(offer.values[0]));
-            res.push(((i) => soroban_client_1.xdr.ScVal.scvBytes(i))(offer.values[1]));
-            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offer.values[2]));
-            res.push(((i) => (0, convert_js_1.i128ToScVal)(i))(offer.values[3]));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offer.values[0]));
+            res.push(((i) => (0, convert_js_1.i128ToScVal)(i))(offer.values[1]));
+            break;
+        case "AssetSell":
+            res.push(((i) => soroban_client_1.xdr.ScVal.scvSymbol(i))("AssetSell"));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offer.values[0]));
+            res.push(((i) => (0, convert_js_1.addressToScVal)(i))(offer.values[1]));
+            res.push(((i) => (0, convert_js_1.i128ToScVal)(i))(offer.values[2]));
             break;
     }
     return soroban_client_1.xdr.ScVal.scvVec(res);
