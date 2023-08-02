@@ -2,7 +2,7 @@ import { Contract } from 'soroban-client';
 /**
  * The Soroban contract ID for the colorglyph-sdk contract.
  */
-export const CONTRACT_ID = 'CCSFGKSGV2OPMD45DIW2M4ZXIBZAJ73C23IBZO4KD4FQTZREX6HXHXFE';
+export const CONTRACT_ID = 'CADKVUHIBZBFX4BIWLNOGWQMCJZKYWDHUJIE55MNIX5NDJKOBJHTDDOM';
 /**
  * The Soroban contract ID for the colorglyph-sdk contract, in hex.
  * If {@link CONTRACT_ID} is a new-style `C…` string, you will need this hex
@@ -16,4 +16,4 @@ export const NETWORK_PASSPHRASE = 'Test SDF Future Network ; October 2022';
 /**
  * The Soroban RPC endpoint used to initialize this library.
  */
-export const RPC_URL = 'http://localhost:8000/soroban/rpc';
+export const RPC_URL = 'https://rpc-futurenet.stellar.org:443';
