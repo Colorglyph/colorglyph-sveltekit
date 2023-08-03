@@ -5,7 +5,7 @@ const soroban_client_1 = require("soroban-client");
 /**
  * The Soroban contract ID for the colorglyph-sdk contract.
  */
-exports.CONTRACT_ID = 'CADKVUHIBZBFX4BIWLNOGWQMCJZKYWDHUJIE55MNIX5NDJKOBJHTDDOM';
+exports.CONTRACT_ID = 'CCCI5CPRMWUM5UCBZUY2YAYM5EE5TVR3NIBMNYYA7DLSZWSCQWCURRYY';
 /**
  * The Soroban contract ID for the colorglyph-sdk contract, in hex.
  * If {@link CONTRACT_ID} is a new-style `C…` string, you will need this hex

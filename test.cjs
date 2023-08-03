@@ -1,17 +1,17 @@
 const SorobanClient = require('soroban-client')
 const xdr = SorobanClient.xdr
 
-const pubkey = 'GD3YTR6H7EXYRUJTLPM23LBMESA2JOY32KNPUXMYDUOI5LILD4MWLDIZ' //'GALR7P2KNUOEGK6OIOZTYCX2R2BMGNLQLHW2T5J6QEBHOKIE7H3DOK4R'
-const secret = 'SDKSSSOWMTO43IQP6V54OC2L42I6PFMVWHMXWRWLK6KYIPYANXQGP4MK' // 'SDSYOV3QSO4LOOAIDQ6PYKTCINWVODIO6JLD6CG4BC3M4DQ7I75IR6PM'
+const pubkey = 'GD3YTR6H7EXYRUJTLPM23LBMESA2JOY32KNPUXMYDUOI5LILD4MWLDIZ'
+const secret = 'SDKSSSOWMTO43IQP6V54OC2L42I6PFMVWHMXWRWLK6KYIPYANXQGP4MK'
 const keypair = SorobanClient.Keypair.fromSecret(secret)
 const server = new SorobanClient.Server('https://rpc-futurenet.stellar.org')
-const contractId = 'CADKVUHIBZBFX4BIWLNOGWQMCJZKYWDHUJIE55MNIX5NDJKOBJHTDDOM'
+const contractId = 'CCCI5CPRMWUM5UCBZUY2YAYM5EE5TVR3NIBMNYYA7DLSZWSCQWCURRYY'
 const contract = new SorobanClient.Contract(contractId)
-const glyph = 'f11875748c9ff1acf8d010d6d0bf88e8aa612d47f85daef4a45c6f179fbbbbe1'
+const glyph = '144a75075eb4901f18e3ab4ad5b5b8cc63d999969a6b8815c5a64b51ae84e32c'
 const bodyType = xdr.ContractEntryBodyType.dataEntry()
 const durability = xdr.ContractDataDurability.persistent()
 const fee = 1_000_000_000;
-const width = 32;
+const width = 41;
 
 (async () => {
     const contractData = await server.getContractData(contract, new xdr.ScVal.scvLedgerKeyContractInstance(), 'persistent')

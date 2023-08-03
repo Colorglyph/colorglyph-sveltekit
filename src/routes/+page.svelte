@@ -9,17 +9,15 @@
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'; // d93f5c7bb0ebc4a9c8f727c5cebc4e41194d38257e1d0d910356b43bfc528813
 
 	let GLYPH: string | undefined =
-		'f11875748c9ff1acf8d010d6d0bf88e8aa612d47f85daef4a45c6f179fbbbbe1';
+		'144a75075eb4901f18e3ab4ad5b5b8cc63d999969a6b8815c5a64b51ae84e32c';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
 
-	let width: number = 32;
+	let width: number = 41; // 41 max
 	let palette: number[] = [];
 
 	// palette = generateRGBSpectrum(width)
-
-	// console.log(palette);
 
 	class Wallet {
 		async isConnected() {
@@ -68,7 +66,7 @@
 		let mintIndexes = new Map<number, number[]>();
 		let mineColors = new Map(generateRGBSpectrum(width).map((color, index) => {
 			mintIndexes.set(color, [index])
-			return [color, 1000]
+			return [color, 10]
 		}));
 		mineColors = new Map([...mineColors.entries()].sort((a, b) => a[0] - b[0]));
 		mintIndexes = new Map([...mintIndexes.entries()].sort((a, b) => a[0] - b[0]));
@@ -122,19 +120,21 @@
 			},
 			{
 				wallet,
-				responseType: 'simulated',
+				// responseType: 'simulated',
+				responseType: 'full',
 				fee: 1_000_000_000,
 			}
 		);
 
-		console.log('mint', res);
+		// console.log('mint', res);
 
-		// const resXdr: any = xdr['TransactionMeta'].fromXDR(res.resultMetaXdr, 'base64');
-		// const hash = resXdr.value().sorobanMeta().returnValue().value()?.toString('hex');
+		const resXdr: any = xdr['TransactionMeta'].fromXDR(res.resultMetaXdr, 'base64');
+		const hash = resXdr.value().sorobanMeta().returnValue().value()?.toString('hex');
 
-		// console.log(hash);
+		GLYPH = hash
+		console.log(hash);
 
-		// glyph_get();
+		glyph_get();
 	}
 
 	async function colors_mine() {
