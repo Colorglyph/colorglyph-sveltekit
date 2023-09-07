@@ -1,19 +1,35 @@
+
+const shajs = require('sha.js')
 const SorobanClient = require('soroban-client')
 const xdr = SorobanClient.xdr
 
-const pubkey = 'GD3YTR6H7EXYRUJTLPM23LBMESA2JOY32KNPUXMYDUOI5LILD4MWLDIZ'
-const secret = 'SDKSSSOWMTO43IQP6V54OC2L42I6PFMVWHMXWRWLK6KYIPYANXQGP4MK'
+const pubkey = 'GCBDVRWCTRZENDMYBOLAC3PZBP6NGGSILDZTYAUCJUWUGX27BG2VDPID'
+const secret = 'SBQJEN6RVWCB7KUPI6Y4XVBQVHEDQVT2KS2UUIYVQOTWP5EUCNFG6DEJ'
 const keypair = SorobanClient.Keypair.fromSecret(secret)
 const server = new SorobanClient.Server('https://rpc-futurenet.stellar.org')
-const contractId = 'CCCI5CPRMWUM5UCBZUY2YAYM5EE5TVR3NIBMNYYA7DLSZWSCQWCURRYY'
+const contractId = 'CBX37XXSUW7VMDCCX5OUST2EJCFDQ6L2QC7QLGC272AUSP43CEJEHZQR'
 const contract = new SorobanClient.Contract(contractId)
-const glyph = '144a75075eb4901f18e3ab4ad5b5b8cc63d999969a6b8815c5a64b51ae84e32c'
+// const glyph = '144a75075eb4901f18e3ab4ad5b5b8cc63d999969a6b8815c5a64b51ae84e32c'
 const bodyType = xdr.ContractEntryBodyType.dataEntry()
 const durability = xdr.ContractDataDurability.persistent()
-const fee = 1_000_000_000;
-const width = 41;
+const width = 42;
 
 (async () => {
+    let bytes = []
+
+    generateRGBSpectrum(width)
+    .forEach((color) => {
+        let buf = Buffer.alloc(4)
+        buf.writeUInt32BE(color);
+        bytes.push(...buf.slice(1))
+    });
+
+    let buf = Buffer.alloc(4)
+    buf.writeUInt32BE(width);
+    bytes.push(...buf)
+
+    const glyph = shajs('sha256').update(bytes).digest('hex')
+
     const contractData = await server.getContractData(contract, new xdr.ScVal.scvLedgerKeyContractInstance(), 'persistent')
 
     const entry = xdr.LedgerEntryData.fromXDR(contractData.xdr, 'base64')
@@ -21,7 +37,38 @@ const width = 41;
     const executable = xdr.ContractExecutable.contractExecutableWasm(instance.executable())
     const hash = executable.wasmHash().instance().executable().wasmHash()
 
-    const sorobanTransactionData = new xdr.SorobanTransactionData({
+    const sorobanOperation = SorobanClient.Operation.invokeHostFunction({
+        func: new xdr.HostFunction.hostFunctionTypeInvokeContract([
+            new SorobanClient.Address(contractId).toScVal(),
+            xdr.ScVal.scvSymbol("glyph_mint"),
+            SorobanClient.Address.fromString(pubkey).toScVal(),
+            xdr.ScVal.scvVoid(),
+            xdr.ScVal.scvMap([]),
+            xdr.ScVal.scvU32(width),
+        ]),
+        auth: [
+            new xdr.SorobanAuthorizationEntry({
+                credentials: new xdr.SorobanCredentials.sorobanCredentialsSourceAccount(),
+                rootInvocation: new xdr.SorobanAuthorizedInvocation({
+                    function: xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+                        new xdr.SorobanAuthorizedContractFunction({
+                            contractAddress: contract.address().toScAddress(),
+                            functionName: "glyph_mint",
+                            args: [
+                                SorobanClient.Address.fromString(pubkey).toScVal(),
+                                xdr.ScVal.scvVoid(),
+                                xdr.ScVal.scvMap([]),
+                                xdr.ScVal.scvU32(width),
+                            ],
+                        })
+                    ),
+                    subInvocations: [],
+                }),
+            })
+        ]
+    })
+
+    const sorobanData = new xdr.SorobanTransactionData({
         resources: new xdr.SorobanResources({
             footprint: new xdr.LedgerFootprint({
                 readOnly: [
@@ -98,42 +145,11 @@ const width = 41;
 
     const account = await server.getAccount(pubkey);
     const transaction = new SorobanClient.TransactionBuilder(account, {
-        fee,
+        fee: 1_000_000_000,
         networkPassphrase: SorobanClient.Networks.FUTURENET
     })
-    .addOperation(
-        SorobanClient.Operation.invokeHostFunction({
-            func: new xdr.HostFunction.hostFunctionTypeInvokeContract([
-                new SorobanClient.Address(contractId).toScVal(),
-                xdr.ScVal.scvSymbol("glyph_mint"),
-                SorobanClient.Address.fromString(pubkey).toScVal(),
-                xdr.ScVal.scvVoid(),
-                xdr.ScVal.scvMap([]),
-                xdr.ScVal.scvU32(width),
-            ]),
-            auth: [
-                new xdr.SorobanAuthorizationEntry({
-                    credentials: new xdr.SorobanCredentials.sorobanCredentialsSourceAccount(),
-                    rootInvocation: new xdr.SorobanAuthorizedInvocation({
-                        function: xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-                            new xdr.SorobanAuthorizedContractFunction({
-                                contractAddress: contract.address().toScAddress(),
-                                functionName: "glyph_mint",
-                                args: [
-                                    SorobanClient.Address.fromString(pubkey).toScVal(),
-                                    xdr.ScVal.scvVoid(),
-                                    xdr.ScVal.scvMap([]),
-                                    xdr.ScVal.scvU32(width),
-                                ],
-                            })
-                        ),
-                        subInvocations: [],
-                    }),
-                })
-            ]
-        })
-    )
-    .setSorobanData(sorobanTransactionData)
+    .addOperation(sorobanOperation)
+    .setSorobanData(sorobanData)
     .setTimeout(0)
     .build();
 
@@ -163,3 +179,20 @@ const width = 41;
         console.log(res)
     }, 500)
 })()
+
+function generateRGBSpectrum(steps) {
+    const colorArray = [];
+
+    for (let i = 0; i < steps; i++) {
+        for (let j = 0; j < steps; j++) {
+            const red = 255 - Math.floor((i * 255) / steps);
+            const green = 255 - Math.floor((j * 255) / steps);
+            const blue = Math.floor((i * j * 255) / (steps * steps));
+
+            const colorValue = red * Math.pow(256, 2) + green * 256 + blue;
+            colorArray.push(colorValue);
+        }
+    }
+
+    return colorArray;
+}

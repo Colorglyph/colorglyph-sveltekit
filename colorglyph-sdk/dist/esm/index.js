@@ -1,10 +1,10 @@
-import { xdr } from 'soroban-client';
+import * as SorobanClient from 'soroban-client';
+import { ContractSpec, Address } from 'soroban-client';
 import { Buffer } from "buffer";
-import { scValStrToJs, scValToJs, addressToScVal, i128ToScVal, strToScVal } from './convert.js';
 import { invoke } from './invoke.js';
-export * from './constants.js';
-export * from './server.js';
 export * from './invoke.js';
+export * from './method-options.js';
+export { Address };
 ;
 ;
 export class Ok {
@@ -47,422 +47,216 @@ if (typeof window !== 'undefined') {
     //@ts-ignore Buffer exists
     window.Buffer = window.Buffer || Buffer;
 }
-const regex = /ContractError\((\d+)\)/;
-function getError(err) {
-    const match = err.match(regex);
+const regex = /Error\(Contract, #(\d+)\)/;
+function parseError(message) {
+    const match = message.match(regex);
     if (!match) {
         return undefined;
     }
-    if (Errors == undefined) {
+    if (Errors === undefined) {
         return undefined;
     }
-    // @ts-ignore
     let i = parseInt(match[1], 10);
-    if (i < Errors.length) {
-        return new Err(Errors[i]);
+    let err = Errors[i];
+    if (err) {
+        return new Err(err);
     }
     return undefined;
 }
-export async function initialize({ token_address, fee_address }, options = {}) {
-    return await invoke({
-        method: 'initialize',
-        args: [((i) => addressToScVal(i))(token_address),
-            ((i) => addressToScVal(i))(fee_address)],
-        ...options,
-        parseResultXdr: () => { },
-    });
-}
-export async function colorsMine({ miner, to, colors }, options = {}) {
-    return await invoke({
-        method: 'colors_mine',
-        args: [((i) => addressToScVal(i))(miner),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-            ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                return new xdr.ScMapEntry({
-                    key: ((i) => xdr.ScVal.scvU32(i))(key),
-                    val: ((i) => xdr.ScVal.scvU32(i))(value)
-                });
-            })))(colors)],
-        ...options,
-        parseResultXdr: () => { },
-    });
-}
-export async function colorsTransfer({ from, to, colors }, options = {}) {
-    return await invoke({
-        method: 'colors_transfer',
-        args: [((i) => addressToScVal(i))(from),
-            ((i) => addressToScVal(i))(to),
-            ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvVec([((i) => addressToScVal(i))(i[0]),
-                ((i) => xdr.ScVal.scvU32(i))(i[1]),
-                ((i) => xdr.ScVal.scvU32(i))(i[2])]))))(colors)],
-        ...options,
-        parseResultXdr: () => { },
-    });
-}
-export async function colorBalance({ owner, miner, color }, options = {}) {
-    return await invoke({
-        method: 'color_balance',
-        args: [((i) => addressToScVal(i))(owner),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(miner),
-            ((i) => xdr.ScVal.scvU32(i))(color)],
-        ...options,
-        parseResultXdr: (xdr) => {
-            return scValStrToJs(xdr);
-        },
-    });
-}
-export async function glyphMint({ minter, to, colors, width }, options = {}) {
-    return await invoke({
-        method: 'glyph_mint',
-        args: [((i) => addressToScVal(i))(minter),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-            ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                return new xdr.ScMapEntry({
-                    key: ((i) => addressToScVal(i))(key),
-                    val: ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                        return new xdr.ScMapEntry({
-                            key: ((i) => xdr.ScVal.scvU32(i))(key),
-                            val: ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvU32(i))))(value)
-                        });
-                    })))(value)
-                });
-            })))(colors),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : xdr.ScVal.scvU32(i))(width)],
-        ...options,
-        parseResultXdr: (xdr) => {
-            return scValStrToJs(xdr);
-        },
-    });
-}
-export async function glyphTransfer({ to, hash_type }, options = {}) {
-    return await invoke({
-        method: 'glyph_transfer',
-        args: [((i) => addressToScVal(i))(to),
-            ((i) => HashTypeToXdr(i))(hash_type)],
-        ...options,
-        parseResultXdr: () => { },
-    });
-}
-export async function glyphScrape({ to, hash_type }, options = {}) {
-    return await invoke({
-        method: 'glyph_scrape',
-        args: [((i) => (!i) ? xdr.ScVal.scvVoid() : addressToScVal(i))(to),
-            ((i) => HashTypeToXdr(i))(hash_type)],
-        ...options,
-        parseResultXdr: () => { },
-    });
-}
-export async function glyphGet({ hash_type }, options = {}) {
-    return await invoke({
-        method: 'glyph_get',
-        args: [((i) => HashTypeToXdr(i))(hash_type)],
-        ...options,
-        parseResultXdr: (xdr) => {
-            try {
-                return new Ok(scValStrToJs(xdr));
-            }
-            catch (e) {
-                //@ts-ignore
-                let err = getError(e.message);
-                if (err) {
+export const networks = {
+    futurenet: {
+        networkPassphrase: "Test SDF Future Network ; October 2022",
+        contractId: "CBLKUYT7K4RADZLNLIMTZD6FUVX2ZZF6MJVA3R7A2VZCDF4VPVK62DG7",
+    }
+};
+const Errors = {
+    1: { message: "" },
+    2: { message: "" },
+    3: { message: "" },
+    4: { message: "" },
+    5: { message: "" },
+    6: { message: "" },
+    7: { message: "" },
+    8: { message: "" }
+};
+export class Contract {
+    options;
+    spec;
+    constructor(options) {
+        this.options = options;
+        this.spec = new ContractSpec([
+            "AAAAAAAAAAAAAAAKaW5pdGlhbGl6ZQAAAAAAAgAAAAAAAAANdG9rZW5fYWRkcmVzcwAAAAAAABMAAAAAAAAAC2ZlZV9hZGRyZXNzAAAAABMAAAAA",
+            "AAAAAAAAAAAAAAALY29sb3JzX21pbmUAAAAAAwAAAAAAAAAFbWluZXIAAAAAAAATAAAAAAAAAAJ0bwAAAAAD6AAAABMAAAAAAAAABmNvbG9ycwAAAAAD7AAAAAQAAAAEAAAAAA==",
+            "AAAAAAAAAAAAAAAPY29sb3JzX3RyYW5zZmVyAAAAAAMAAAAAAAAABGZyb20AAAATAAAAAAAAAAJ0bwAAAAAAEwAAAAAAAAAGY29sb3JzAAAAAAPqAAAD7QAAAAMAAAATAAAABAAAAAQAAAAA",
+            "AAAAAAAAAAAAAAANY29sb3JfYmFsYW5jZQAAAAAAAAMAAAAAAAAABW93bmVyAAAAAAAAEwAAAAAAAAAFbWluZXIAAAAAAAPoAAAAEwAAAAAAAAAFY29sb3IAAAAAAAAEAAAAAQAAAAQ=",
+            "AAAAAAAAAAAAAAAKZ2x5cGhfbWludAAAAAAABAAAAAAAAAAGbWludGVyAAAAAAATAAAAAAAAAAJ0bwAAAAAD6AAAABMAAAAAAAAABmNvbG9ycwAAAAAD7AAAABMAAAPsAAAABAAAA+oAAAAEAAAAAAAAAAV3aWR0aAAAAAAAA+gAAAAEAAAAAQAAA+gAAAPuAAAAIA==",
+            "AAAAAAAAAAAAAAAOZ2x5cGhfdHJhbnNmZXIAAAAAAAIAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAloYXNoX3R5cGUAAAAAAAfQAAAACEhhc2hUeXBlAAAAAA==",
+            "AAAAAAAAAAAAAAAMZ2x5cGhfc2NyYXBlAAAAAgAAAAAAAAACdG8AAAAAA+gAAAATAAAAAAAAAAloYXNoX3R5cGUAAAAAAAfQAAAACEhhc2hUeXBlAAAAAA==",
+            "AAAAAAAAAAAAAAAJZ2x5cGhfZ2V0AAAAAAAAAQAAAAAAAAAJaGFzaF90eXBlAAAAAAAH0AAAAAhIYXNoVHlwZQAAAAEAAAPpAAAH0AAAAAlHbHlwaFR5cGUAAAAAAAAD",
+            "AAAAAAAAAAAAAAAKb2ZmZXJfcG9zdAAAAAAAAgAAAAAAAAAEc2VsbAAAB9AAAAAFT2ZmZXIAAAAAAAAAAAAAA2J1eQAAAAfQAAAABU9mZmVyAAAAAAAAAQAAA+kAAAPtAAAAAAAAAAM=",
+            "AAAAAAAAAAAAAAAMb2ZmZXJfZGVsZXRlAAAAAgAAAAAAAAAEc2VsbAAAB9AAAAAFT2ZmZXIAAAAAAAAAAAAAA2J1eQAAAAPoAAAH0AAAAAVPZmZlcgAAAAAAAAEAAAPpAAAD7QAAAAAAAAAD",
+            "AAAAAAAAAAAAAAAKb2ZmZXJzX2dldAAAAAAAAgAAAAAAAAAEc2VsbAAAB9AAAAAFT2ZmZXIAAAAAAAAAAAAAA2J1eQAAAAPoAAAH0AAAAAVPZmZlcgAAAAAAAAEAAAPpAAAD7QAAAAAAAAAD",
+            "AAAABAAAAAAAAAAAAAAABUVycm9yAAAAAAAACAAAAAAAAAAITm90Rm91bmQAAAABAAAAAAAAAAhOb3RFbXB0eQAAAAIAAAAAAAAADU5vdEF1dGhvcml6ZWQAAAAAAAADAAAAAAAAAAxOb3RQZXJtaXR0ZWQAAAAEAAAAAAAAAAxNaXNzaW5nV2lkdGgAAAAFAAAAAAAAAAlNaXNzaW5nSWQAAAAAAAAGAAAAAAAAAA5NaXNzaW5nQWRkcmVzcwAAAAAABwAAAAAAAAAKTWlzc2luZ0J1eQAAAAAACA==",
+            "AAAAAgAAAAAAAAAAAAAAClN0b3JhZ2VLZXkAAAAAAAoAAAAAAAAAAAAAAAxUb2tlbkFkZHJlc3MAAAAAAAAAAAAAAApGZWVBZGRyZXNzAAAAAAABAAAAAAAAAAVDb2xvcgAAAAAAAAMAAAATAAAAEwAAAAQAAAABAAAAAAAAAAZDb2xvcnMAAAAAAAEAAAATAAAAAQAAAAAAAAAFR2x5cGgAAAAAAAABAAAD7gAAACAAAAABAAAAAAAAAAREdXN0AAAAAQAAABMAAAABAAAAAAAAAApHbHlwaE93bmVyAAAAAAABAAAD7gAAACAAAAABAAAAAAAAAAtHbHlwaE1pbnRlcgAAAAABAAAD7gAAACAAAAABAAAAAAAAAApHbHlwaE9mZmVyAAAAAAABAAAD7gAAACAAAAABAAAAAAAAAApBc3NldE9mZmVyAAAAAAADAAAD7gAAACAAAAATAAAACw==",
+            "AAAAAgAAAAAAAAAAAAAACEhhc2hUeXBlAAAAAwAAAAEAAAAAAAAABkNvbG9ycwAAAAAAAQAAABMAAAABAAAAAAAAAAREdXN0AAAAAQAAABMAAAABAAAAAAAAAAVHbHlwaAAAAAAAAAEAAAPuAAAAIA==",
+            "AAAAAgAAAAAAAAAAAAAACUdseXBoVHlwZQAAAAAAAAIAAAABAAAAAAAAAAZDb2xvcnMAAAAAAAEAAAPsAAAAEwAAA+wAAAAEAAAD6gAAAAQAAAABAAAAAAAAAAVHbHlwaAAAAAAAAAEAAAfQAAAABUdseXBoAAAA",
+            "AAAAAQAAAAAAAAAAAAAABUdseXBoAAAAAAAAAwAAAAAAAAAGY29sb3JzAAAAAAPsAAAAEwAAA+wAAAAEAAAD6gAAAAQAAAAAAAAABmxlbmd0aAAAAAAABAAAAAAAAAAFd2lkdGgAAAAAAAAE",
+            "AAAAAgAAAAAAAAAAAAAAC09mZmVyQ3JlYXRlAAAAAAIAAAABAAAAAAAAAAVHbHlwaAAAAAAAAAIAAAPuAAAAIAAAB9AAAAAFT2ZmZXIAAAAAAAABAAAAAAAAAAVBc3NldAAAAAAAAAQAAAPuAAAAIAAAABMAAAATAAAACw==",
+            "AAAAAgAAAAAAAAAAAAAABU9mZmVyAAAAAAAAAwAAAAEAAAAAAAAABUdseXBoAAAAAAAAAQAAA+4AAAAgAAAAAQAAAAAAAAAFQXNzZXQAAAAAAAACAAAAEwAAAAsAAAABAAAAAAAAAAlBc3NldFNlbGwAAAAAAAADAAAAEwAAABMAAAAL"
+        ]);
+    }
+    async initialize({ token_address, fee_address }, options = {}) {
+        return await invoke({
+            method: 'initialize',
+            args: this.spec.funcArgsToScVals("initialize", { token_address, fee_address }),
+            ...options,
+            ...this.options,
+            parseResultXdr: () => { },
+        });
+    }
+    async colorsMine({ miner, to, colors }, options = {}) {
+        return await invoke({
+            method: 'colors_mine',
+            args: this.spec.funcArgsToScVals("colors_mine", { miner, to, colors }),
+            ...options,
+            ...this.options,
+            parseResultXdr: () => { },
+        });
+    }
+    async colorsTransfer({ from, to, colors }, options = {}) {
+        return await invoke({
+            method: 'colors_transfer',
+            args: this.spec.funcArgsToScVals("colors_transfer", { from, to, colors }),
+            ...options,
+            ...this.options,
+            parseResultXdr: () => { },
+        });
+    }
+    async colorBalance({ owner, miner, color }, options = {}) {
+        return await invoke({
+            method: 'color_balance',
+            args: this.spec.funcArgsToScVals("color_balance", { owner, miner, color }),
+            ...options,
+            ...this.options,
+            parseResultXdr: (xdr) => {
+                return this.spec.funcResToNative("color_balance", xdr);
+            },
+        });
+    }
+    async glyphMint({ minter, to, colors, width }, options = {}) {
+        return await invoke({
+            method: 'glyph_mint',
+            args: this.spec.funcArgsToScVals("glyph_mint", { minter, to, colors, width }),
+            ...options,
+            ...this.options,
+            parseResultXdr: (xdr) => {
+                return this.spec.funcResToNative("glyph_mint", xdr);
+            },
+        });
+    }
+    async glyphTransfer({ to, hash_type }, options = {}) {
+        return await invoke({
+            method: 'glyph_transfer',
+            args: this.spec.funcArgsToScVals("glyph_transfer", { to, hash_type }),
+            ...options,
+            ...this.options,
+            parseResultXdr: () => { },
+        });
+    }
+    async glyphScrape({ to, hash_type }, options = {}) {
+        return await invoke({
+            method: 'glyph_scrape',
+            args: this.spec.funcArgsToScVals("glyph_scrape", { to, hash_type }),
+            ...options,
+            ...this.options,
+            parseResultXdr: () => { },
+        });
+    }
+    async glyphGet({ hash_type }, options = {}) {
+        try {
+            return await invoke({
+                method: 'glyph_get',
+                args: this.spec.funcArgsToScVals("glyph_get", { hash_type }),
+                ...options,
+                ...this.options,
+                parseResultXdr: (xdr) => {
+                    xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr;
+                    console.log(xdr.toXDR('base64'));
+                    return new Ok(SorobanClient.scValToNative(xdr));
+                    // return new Ok(this.spec.funcResToNative("glyph_get", xdr));
+                },
+            });
+        }
+        catch (e) {
+            if (typeof e === 'string') {
+                let err = parseError(e);
+                if (err)
                     return err;
-                }
-                else {
-                    throw e;
-                }
             }
-        },
-    });
-}
-export async function offerPost({ sell, buy }, options = {}) {
-    return await invoke({
-        method: 'offer_post',
-        args: [((i) => OfferToXdr(i))(sell),
-            ((i) => OfferToXdr(i))(buy)],
-        ...options,
-        parseResultXdr: (xdr) => {
-            try {
-                return new Ok(scValStrToJs(xdr));
-            }
-            catch (e) {
-                //@ts-ignore
-                let err = getError(e.message);
-                if (err) {
+            throw e;
+        }
+    }
+    async offerPost({ sell, buy }, options = {}) {
+        try {
+            return await invoke({
+                method: 'offer_post',
+                args: this.spec.funcArgsToScVals("offer_post", { sell, buy }),
+                ...options,
+                ...this.options,
+                parseResultXdr: (xdr) => {
+                    return new Ok(this.spec.funcResToNative("offer_post", xdr));
+                },
+            });
+        }
+        catch (e) {
+            if (typeof e === 'string') {
+                let err = parseError(e);
+                if (err)
                     return err;
-                }
-                else {
-                    throw e;
-                }
             }
-        },
-    });
-}
-export async function offerDelete({ sell, buy }, options = {}) {
-    return await invoke({
-        method: 'offer_delete',
-        args: [((i) => OfferToXdr(i))(sell),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : OfferToXdr(i))(buy)],
-        ...options,
-        parseResultXdr: (xdr) => {
-            try {
-                return new Ok(scValStrToJs(xdr));
-            }
-            catch (e) {
-                //@ts-ignore
-                let err = getError(e.message);
-                if (err) {
+            throw e;
+        }
+    }
+    async offerDelete({ sell, buy }, options = {}) {
+        try {
+            return await invoke({
+                method: 'offer_delete',
+                args: this.spec.funcArgsToScVals("offer_delete", { sell, buy }),
+                ...options,
+                ...this.options,
+                parseResultXdr: (xdr) => {
+                    return new Ok(this.spec.funcResToNative("offer_delete", xdr));
+                },
+            });
+        }
+        catch (e) {
+            if (typeof e === 'string') {
+                let err = parseError(e);
+                if (err)
                     return err;
-                }
-                else {
-                    throw e;
-                }
             }
-        },
-    });
-}
-export async function offersGet({ sell, buy }, options = {}) {
-    return await invoke({
-        method: 'offers_get',
-        args: [((i) => OfferToXdr(i))(sell),
-            ((i) => (!i) ? xdr.ScVal.scvVoid() : OfferToXdr(i))(buy)],
-        ...options,
-        parseResultXdr: (xdr) => {
-            try {
-                return new Ok(scValStrToJs(xdr));
-            }
-            catch (e) {
-                //@ts-ignore
-                let err = getError(e.message);
-                if (err) {
+            throw e;
+        }
+    }
+    async offersGet({ sell, buy }, options = {}) {
+        try {
+            return await invoke({
+                method: 'offers_get',
+                args: this.spec.funcArgsToScVals("offers_get", { sell, buy }),
+                ...options,
+                ...this.options,
+                parseResultXdr: (xdr) => {
+                    return new Ok(this.spec.funcResToNative("offers_get", xdr));
+                },
+            });
+        }
+        catch (e) {
+            if (typeof e === 'string') {
+                let err = parseError(e);
+                if (err)
                     return err;
-                }
-                else {
-                    throw e;
-                }
             }
-        },
-    });
-}
-const Errors = [
-    { message: "" },
-    { message: "" },
-    { message: "" },
-    { message: "" },
-    { message: "" },
-    { message: "" },
-    { message: "" },
-    { message: "" }
-];
-function StorageKeyToXdr(storageKey) {
-    if (!storageKey) {
-        return xdr.ScVal.scvVoid();
+            throw e;
+        }
     }
-    let res = [];
-    switch (storageKey.tag) {
-        case "TokenAddress":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("TokenAddress"));
-            break;
-        case "FeeAddress":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("FeeAddress"));
-            break;
-        case "Color":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Color"));
-            res.push(((i) => addressToScVal(i))(storageKey.values[0]));
-            res.push(((i) => addressToScVal(i))(storageKey.values[1]));
-            res.push(((i) => xdr.ScVal.scvU32(i))(storageKey.values[2]));
-            break;
-        case "Colors":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
-            res.push(((i) => addressToScVal(i))(storageKey.values[0]));
-            break;
-        case "Glyph":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            break;
-        case "Dust":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Dust"));
-            res.push(((i) => addressToScVal(i))(storageKey.values[0]));
-            break;
-        case "GlyphOwner":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphOwner"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            break;
-        case "GlyphMinter":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphMinter"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            break;
-        case "GlyphOffer":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("GlyphOffer"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            break;
-        case "AssetOffer":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("AssetOffer"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(storageKey.values[0]));
-            res.push(((i) => addressToScVal(i))(storageKey.values[1]));
-            res.push(((i) => i128ToScVal(i))(storageKey.values[2]));
-            break;
-    }
-    return xdr.ScVal.scvVec(res);
-}
-function StorageKeyFromXdr(base64Xdr) {
-    let [tag, values] = strToScVal(base64Xdr).vec().map(scValToJs);
-    if (!tag) {
-        throw new Error('Missing enum tag when decoding StorageKey from XDR');
-    }
-    return { tag, values };
-}
-function HashTypeToXdr(hashType) {
-    if (!hashType) {
-        return xdr.ScVal.scvVoid();
-    }
-    let res = [];
-    switch (hashType.tag) {
-        case "Colors":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
-            res.push(((i) => addressToScVal(i))(hashType.values[0]));
-            break;
-        case "Dust":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Dust"));
-            res.push(((i) => addressToScVal(i))(hashType.values[0]));
-            break;
-        case "Glyph":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(hashType.values[0]));
-            break;
-    }
-    return xdr.ScVal.scvVec(res);
-}
-function HashTypeFromXdr(base64Xdr) {
-    let [tag, values] = strToScVal(base64Xdr).vec().map(scValToJs);
-    if (!tag) {
-        throw new Error('Missing enum tag when decoding HashType from XDR');
-    }
-    return { tag, values };
-}
-function GlyphTypeToXdr(glyphType) {
-    if (!glyphType) {
-        return xdr.ScVal.scvVoid();
-    }
-    let res = [];
-    switch (glyphType.tag) {
-        case "Colors":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Colors"));
-            res.push(((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                return new xdr.ScMapEntry({
-                    key: ((i) => addressToScVal(i))(key),
-                    val: ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                        return new xdr.ScMapEntry({
-                            key: ((i) => xdr.ScVal.scvU32(i))(key),
-                            val: ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvU32(i))))(value)
-                        });
-                    })))(value)
-                });
-            })))(glyphType.values[0]));
-            break;
-        case "Glyph":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => GlyphToXdr(i))(glyphType.values[0]));
-            break;
-    }
-    return xdr.ScVal.scvVec(res);
-}
-function GlyphTypeFromXdr(base64Xdr) {
-    let [tag, values] = strToScVal(base64Xdr).vec().map(scValToJs);
-    if (!tag) {
-        throw new Error('Missing enum tag when decoding GlyphType from XDR');
-    }
-    return { tag, values };
-}
-function GlyphToXdr(glyph) {
-    if (!glyph) {
-        return xdr.ScVal.scvVoid();
-    }
-    let arr = [
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("colors"), val: ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                return new xdr.ScMapEntry({
-                    key: ((i) => addressToScVal(i))(key),
-                    val: ((i) => xdr.ScVal.scvMap(Array.from(i.entries()).map(([key, value]) => {
-                        return new xdr.ScMapEntry({
-                            key: ((i) => xdr.ScVal.scvU32(i))(key),
-                            val: ((i) => xdr.ScVal.scvVec(i.map((i) => xdr.ScVal.scvU32(i))))(value)
-                        });
-                    })))(value)
-                });
-            })))(glyph["colors"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("length"), val: ((i) => xdr.ScVal.scvU32(i))(glyph["length"]) }),
-        new xdr.ScMapEntry({ key: ((i) => xdr.ScVal.scvSymbol(i))("width"), val: ((i) => xdr.ScVal.scvU32(i))(glyph["width"]) })
-    ];
-    return xdr.ScVal.scvMap(arr);
-}
-function GlyphFromXdr(base64Xdr) {
-    let scVal = strToScVal(base64Xdr);
-    let obj = scVal.map().map(e => [e.key().str(), e.val()]);
-    let map = new Map(obj);
-    if (!obj) {
-        throw new Error('Invalid XDR');
-    }
-    return {
-        colors: scValToJs(map.get("colors")),
-        length: scValToJs(map.get("length")),
-        width: scValToJs(map.get("width"))
-    };
-}
-function OfferCreateToXdr(offerCreate) {
-    if (!offerCreate) {
-        return xdr.ScVal.scvVoid();
-    }
-    let res = [];
-    switch (offerCreate.tag) {
-        case "Glyph":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(offerCreate.values[0]));
-            res.push(((i) => OfferToXdr(i))(offerCreate.values[1]));
-            break;
-        case "Asset":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(offerCreate.values[0]));
-            res.push(((i) => addressToScVal(i))(offerCreate.values[1]));
-            res.push(((i) => addressToScVal(i))(offerCreate.values[2]));
-            res.push(((i) => i128ToScVal(i))(offerCreate.values[3]));
-            break;
-    }
-    return xdr.ScVal.scvVec(res);
-}
-function OfferCreateFromXdr(base64Xdr) {
-    let [tag, values] = strToScVal(base64Xdr).vec().map(scValToJs);
-    if (!tag) {
-        throw new Error('Missing enum tag when decoding OfferCreate from XDR');
-    }
-    return { tag, values };
-}
-function OfferToXdr(offer) {
-    if (!offer) {
-        return xdr.ScVal.scvVoid();
-    }
-    let res = [];
-    switch (offer.tag) {
-        case "Glyph":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Glyph"));
-            res.push(((i) => xdr.ScVal.scvBytes(i))(offer.values[0]));
-            break;
-        case "Asset":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("Asset"));
-            res.push(((i) => addressToScVal(i))(offer.values[0]));
-            res.push(((i) => i128ToScVal(i))(offer.values[1]));
-            break;
-        case "AssetSell":
-            res.push(((i) => xdr.ScVal.scvSymbol(i))("AssetSell"));
-            res.push(((i) => addressToScVal(i))(offer.values[0]));
-            res.push(((i) => addressToScVal(i))(offer.values[1]));
-            res.push(((i) => i128ToScVal(i))(offer.values[2]));
-            break;
-    }
-    return xdr.ScVal.scvVec(res);
-}
-function OfferFromXdr(base64Xdr) {
-    let [tag, values] = strToScVal(base64Xdr).vec().map(scValToJs);
-    if (!tag) {
-        throw new Error('Missing enum tag when decoding Offer from XDR');
-    }
-    return { tag, values };
 }

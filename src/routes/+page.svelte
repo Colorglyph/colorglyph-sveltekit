@@ -1,21 +1,22 @@
 <script lang="ts">
-	import * as ColorglyphSDK from 'colorglyph-sdk';
+	import { generateRGBSpectrum } from '$lib/utils';
+	import { Contract, Address } from 'colorglyph-sdk';
+	import type { Ok, HashType, GlyphType, Offer } from 'colorglyph-sdk';
 	import { Keypair, Networks, Transaction, xdr } from 'soroban-client';
 
-	const ME = 'GD3YTR6H7EXYRUJTLPM23LBMESA2JOY32KNPUXMYDUOI5LILD4MWLDIZ';
-	const ME_kp = Keypair.fromSecret('SDKSSSOWMTO43IQP6V54OC2L42I6PFMVWHMXWRWLK6KYIPYANXQGP4MK');
+	const ME = 'GCBDVRWCTRZENDMYBOLAC3PZBP6NGGSILDZTYAUCJUWUGX27BG2VDPID';
+	const ME_kp = Keypair.fromSecret('SBQJEN6RVWCB7KUPI6Y4XVBQVHEDQVT2KS2UUIYVQOTWP5EUCNFG6DEJ');
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y';
 	const THEM_sk = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC');
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'; // d93f5c7bb0ebc4a9c8f727c5cebc4e41194d38257e1d0d910356b43bfc528813
 
-	let GLYPH: string | undefined =
-		'144a75075eb4901f18e3ab4ad5b5b8cc63d999969a6b8815c5a64b51ae84e32c';
+	let GLYPH: string = '8ba3bed0bc43fc82f73dcb4ae3973ef12a8b179ae572e500b846697dc796a6c6';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
 
-	let width: number = 41; // 41 max
-	let palette: number[] = [];
+	let width: number = 3 // 42
+	let palette: number[] = []
 
 	// palette = generateRGBSpectrum(width)
 
@@ -40,24 +41,12 @@
 		}
 	}
 
-	const wallet = new Wallet();
-
-	function generateRGBSpectrum(steps: number) {
-		const colorArray = [];
-
-		for (let i = 0; i < steps; i++) {
-			for (let j = 0; j < steps; j++) {
-				const red = 255 - Math.floor((i * 255) / steps);
-				const green = 255 - Math.floor((j * 255) / steps);
-				const blue = Math.floor((i * j * 255) / (steps * steps));
-
-				const colorValue = red * Math.pow(256, 2) + green * 256 + blue;
-				colorArray.push(colorValue);
-			}
-		}
-
-		return colorArray;
-	}
+	const ColorglyphSDK = new Contract({
+		contractId: 'CCVHQXKBIJPVCKTNZIZJHLY75ROVVYAB2SE3RBZRWZ46JJ2XRGISFLGZ',
+		networkPassphrase: 'Test SDF Future Network ; October 2022',
+		rpcUrl: 'https://rpc-futurenet.stellar.org',
+		wallet: new Wallet()
+	});
 
 	async function super_mint() {
 		let max_mine = 18;
@@ -75,12 +64,11 @@
 			let map = Array.from(mineColors).slice(index * max_mine, index * max_mine + max_mine);
 			let res = await ColorglyphSDK.colorsMine(
 				{
-					miner: ME,
+					miner: new Address(ME),
 					to: undefined,
 					colors: new Map(map)
 				},
 				{
-					wallet,
 					responseType: 'full',
 					fee: 1_000_000
 				}
@@ -96,13 +84,12 @@
 
 			let res: any = await ColorglyphSDK.glyphMint(
 				{
-					minter: ME,
+					minter: new Address(ME),
 					to: undefined,
 					colors: mintMap,
 					width: undefined
 				},
 				{
-					wallet,
 					responseType: 'full',
 					fee: 1_000_000
 				}
@@ -113,23 +100,21 @@
 
 		let res: any = await ColorglyphSDK.glyphMint(
 			{
-				minter: ME,
+				minter: new Address(ME),
 				to: undefined,
 				colors: new Map(),
 				width
 			},
 			{
-				wallet,
 				// responseType: 'simulated',
 				responseType: 'full',
-				fee: 1_000_000_000,
+				fee: 1_000_000,
 			}
 		);
 
-		// console.log('mint', res);
+		console.log('mint', res);
 
-		const resXdr: any = xdr['TransactionMeta'].fromXDR(res.resultMetaXdr, 'base64');
-		const hash = resXdr.value().sorobanMeta().returnValue().value()?.toString('hex');
+		const hash = res.resultMetaXdr.value().sorobanMeta().returnValue().value()?.toString('hex');
 
 		GLYPH = hash
 		console.log(hash);
@@ -140,11 +125,14 @@
 	async function colors_mine() {
 		let res = await ColorglyphSDK.colorsMine(
 			{
-				miner: ME,
+				miner: new Address(ME),
 				to: undefined,
 				colors: new Map(new Array(17).fill(0).map((_, i) => [i, 1000]))
 			},
-			{ responseType: 'full', fee: 1_000_000 }
+			{ 
+				// responseType: 'full', 
+				fee: 1_000_000 
+			}
 		);
 
 		console.log(res);
@@ -153,14 +141,17 @@
 	async function colors_transfer() {
 		let res = await ColorglyphSDK.colorsTransfer(
 			{
-				from: ME,
-				to: THEM,
+				from: new Address(ME),
+				to: new Address(THEM),
 				colors: [
-					[ME, 0, 1],
-					[ME, 1, 1]
+					[new Address(ME), 0, 1],
+					[new Address(ME), 1, 1]
 				]
 			},
-			{ responseType: 'full', fee: 1_000_000 }
+			{ 
+				// responseType: 'full', 
+				fee: 1_000_000 
+			}
 		);
 
 		console.log(res);
@@ -168,7 +159,7 @@
 
 	async function color_balance() {
 		let res = await ColorglyphSDK.colorBalance({
-			owner: ME,
+			owner: new Address(ME),
 			miner: undefined,
 			color: 0
 		});
@@ -176,39 +167,41 @@
 		console.log(res);
 	}
 
-	// submit ✅ // return ❌
 	async function glyph_mint() {
 		let indexes = new Map<number, number[]>();
-		indexes.set(0, [0, 1]);
-		indexes.set(1, [2, 3]);
+		indexes.set(1, [0, 2]);
+		indexes.set(2, [1, 3]);
 
-		let colors: Map<string, Map<number, number[]>> = new Map();
-		colors.set(ME, indexes);
+		let colors: Map<Address, Map<number, number[]>> = new Map();
+		colors.set(new Address(ME), indexes);
 
 		let res = await ColorglyphSDK.glyphMint(
 			{
-				minter: ME,
+				minter: new Address(ME),
 				to: undefined,
 				colors,
 				width: 2
 			},
 			{
-				responseType: 'full',
+				// responseType: 'full',
 				fee: 1_000_000
 			}
 		);
 
-		console.log(res);
+		console.log(res.toString('hex'));
 	}
 
+	// TODO
+	async function glyph_transfer() {}
+
 	// TODO switch to use getLedgerEntry
-	async function glyph_get() {
+	async function glyph_get(key = ME) {
 		let glyph: any = (await ColorglyphSDK.glyphGet({
 			hash_type: {
 				tag: 'Glyph',
 				values: [Buffer.from(GLYPH, 'hex')]
-			} as ColorglyphSDK.HashType
-		})) as ColorglyphSDK.Ok<ColorglyphSDK.GlyphType>;
+			} as HashType
+		})) as Ok<GlyphType>;
 
 		console.log(glyph);
 
@@ -216,9 +209,9 @@
 
 		width = glyph.width;
 
-		palette = new Array(glyph.length).fill(256**3-1);
+		palette = new Array(glyph.length).fill(256 ** 3 - 1);
 
-		for (const [color, indexes] of Object.entries(glyph.colors.get(ME))) {
+		for (const [color, indexes] of Object.entries(glyph.colors[key])) {
 			for (const index of indexes as number[]) {
 				palette.splice(index, 1, Number(color))	
 			}
@@ -227,16 +220,15 @@
 		palette = palette;
 	}
 
-	// submit ✅ // return ❌
 	async function offer_post(address: string) {
 		const sell = {
 			tag: 'Glyph',
 			values: [Buffer.from(GLYPH, 'hex')]
-		} as ColorglyphSDK.Offer;
+		} as Offer;
 		const buy = {
 			tag: 'Asset',
-			values: [XLM, BigInt(100)]
-		} as ColorglyphSDK.Offer;
+			values: [new Address(XLM), BigInt(100)]
+		} as Offer;
 
 		// TODO if sell Asset use AssetSell
 
@@ -245,7 +237,10 @@
 				sell: address === ME ? sell : buy,
 				buy: address === ME ? buy : sell
 			},
-			{ responseType: 'full', fee: 1_000_000 }
+			{ 
+				// responseType: 'full', 
+				fee: 1_000_000 
+			}
 		);
 
 		console.log(res);
@@ -263,10 +258,13 @@
 				},
 				buy: {
 					tag: 'Asset',
-					values: [XLM, BigInt(100)]
+					values: [new Address(XLM), BigInt(100)]
 				}
 			},
-			{ responseType: 'full', fee: 1_000_000 }
+			{ 
+				// responseType: 'full', 
+				fee: 1_000_000 
+			}
 		);
 
 		console.log(res);
@@ -279,9 +277,12 @@
 				hash_type: {
 					tag: 'Glyph',
 					values: [Buffer.from(GLYPH, 'hex')]
-				} as ColorglyphSDK.HashType
+				} as HashType
 			},
-			{ responseType: 'full', fee: 1_000_000 }
+			{ 
+				// responseType: 'full', 
+				fee: 1_000_000 
+			}
 		);
 
 		console.log(res);
@@ -294,7 +295,7 @@
 	<button class="bg-black text-white" on:click={() => color_balance()}>Color Balance</button>
 
 	<button class="bg-black text-white" on:click={() => glyph_mint()}>Glyph Mint</button>
-	<button class="bg-black text-white" on:click={() => glyph_get()}>Glyph Get</button>
+	<button class="bg-black text-white" on:click={() => glyph_get(ME)}>Glyph Get</button>
 
 	<button class="bg-black text-white" on:click={() => offer_post(ME)}>Offer Post Me</button>
 	<button class="bg-black text-white" on:click={() => offer_post(THEM)}>Offer Post Them</button>
