@@ -36,7 +36,7 @@
 		"prettier-plugin-svelte": "^3.0.3",
 		"rollup-plugin-node-polyfills": "^0.2.1",
 		"sha.js": "^2.4.11",
-		"soroban-client": "^0.11.2",
+		"soroban-client": "github:ahalabs/js-soroban-client#fix/spec_enums",
 		"stellar-base": "9.0.0",
 		"stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit",
 		"svelte": "^4.2.0",

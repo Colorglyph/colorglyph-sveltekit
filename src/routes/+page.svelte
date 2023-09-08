@@ -203,17 +203,17 @@
 			} as HashType
 		})) as Ok<GlyphType>;
 
-		console.log(glyph);
-
-		glyph = glyph.value[1];
+		glyph = glyph.value.values[0];
 
 		width = glyph.width;
 
 		palette = new Array(glyph.length).fill(256 ** 3 - 1);
 
-		for (const [color, indexes] of Object.entries(glyph.colors[key])) {
-			for (const index of indexes as number[]) {
-				palette.splice(index, 1, Number(color))	
+		for (const [_account, colors] of glyph.colors.entries()) {
+			for (const [color, indexes] of colors) {
+				for (const index of indexes as number[]) {
+					palette.splice(index, 1, Number(color))	
+				}
 			}
 		}
 

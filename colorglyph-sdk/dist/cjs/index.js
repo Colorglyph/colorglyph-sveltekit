@@ -15,7 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Contract = exports.networks = exports.Err = exports.Ok = exports.Address = void 0;
-const SorobanClient = require("soroban-client");
 const soroban_client_1 = require("soroban-client");
 Object.defineProperty(exports, "Address", { enumerable: true, get: function () { return soroban_client_1.Address; } });
 const buffer_1 = require("buffer");
@@ -199,10 +198,9 @@ class Contract {
                 ...options,
                 ...this.options,
                 parseResultXdr: (xdr) => {
-                    xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr;
-                    console.log(xdr.toXDR('base64'));
-                    return new Ok(SorobanClient.scValToNative(xdr));
-                    // return new Ok(this.spec.funcResToNative("glyph_get", xdr));
+                    // xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr
+                    // return new Ok(SorobanClient.scValToNative(xdr))
+                    return new Ok(this.spec.funcResToNative("glyph_get", xdr));
                 },
             });
         }

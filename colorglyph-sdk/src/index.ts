@@ -372,13 +372,10 @@ export class Contract {
             ...options,
             ...this.options,
             parseResultXdr: (xdr): Ok<GlyphType> | Err<Error_> | undefined => {
-                xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr
+                // xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr
+                // return new Ok(SorobanClient.scValToNative(xdr))
 
-                console.log(xdr.toXDR('base64'));
-
-                return new Ok(SorobanClient.scValToNative(xdr))
-
-                // return new Ok(this.spec.funcResToNative("glyph_get", xdr));
+                return new Ok(this.spec.funcResToNative("glyph_get", xdr));
             },
         });
         } catch (e) {

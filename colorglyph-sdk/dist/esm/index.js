@@ -1,4 +1,3 @@
-import * as SorobanClient from 'soroban-client';
 import { ContractSpec, Address } from 'soroban-client';
 import { Buffer } from "buffer";
 import { invoke } from './invoke.js';
@@ -180,10 +179,9 @@ export class Contract {
                 ...options,
                 ...this.options,
                 parseResultXdr: (xdr) => {
-                    xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr;
-                    console.log(xdr.toXDR('base64'));
-                    return new Ok(SorobanClient.scValToNative(xdr));
-                    // return new Ok(this.spec.funcResToNative("glyph_get", xdr));
+                    // xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr
+                    // return new Ok(SorobanClient.scValToNative(xdr))
+                    return new Ok(this.spec.funcResToNative("glyph_get", xdr));
                 },
             });
         }

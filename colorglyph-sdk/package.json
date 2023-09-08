@@ -4,7 +4,7 @@
     "dependencies": {
         "@stellar/freighter-api": "1.6.0",
         "buffer": "6.0.3",
-        "soroban-client": "0.11.2"
+        "soroban-client": "github:ahalabs/js-soroban-client#fix/spec_enums"
     },
     "scripts": {
         "build": "node ./scripts/build.mjs"
