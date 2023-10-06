@@ -8,14 +8,14 @@
 	const ME_kp = Keypair.fromSecret('SBQJEN6RVWCB7KUPI6Y4XVBQVHEDQVT2KS2UUIYVQOTWP5EUCNFG6DEJ');
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y';
 	const THEM_sk = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC');
-	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'; // d93f5c7bb0ebc4a9c8f727c5cebc4e41194d38257e1d0d910356b43bfc528813
+	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT';
 
-	let GLYPH: string = '8ba3bed0bc43fc82f73dcb4ae3973ef12a8b179ae572e500b846697dc796a6c6';
+	let GLYPH: string = '252ea0ad98ca90c11f8a281c6e9c56ea4e7f9ccb15fcfe1dbb6b2ef446ccaf79';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
 
-	let width: number = 3 // 42
+	let width: number = 16 // 42
 	let palette: number[] = []
 
 	// palette = generateRGBSpectrum(width)
@@ -42,15 +42,18 @@
 	}
 
 	const ColorglyphSDK = new Contract({
-		contractId: 'CCVHQXKBIJPVCKTNZIZJHLY75ROVVYAB2SE3RBZRWZ46JJ2XRGISFLGZ',
+		contractId: 'CDSXSN5OWU4UHJLHZKWTZZSACTJSWTIQO3PZZLCKTNE5QOT3LFKIH2KG',
 		networkPassphrase: 'Test SDF Future Network ; October 2022',
 		rpcUrl: 'https://rpc-futurenet.stellar.org',
 		wallet: new Wallet()
 	});
 
 	async function super_mint() {
-		let max_mine = 18;
-		let max_mint = 19;
+		// let max_mine = 18;
+		// let max_mint = 19;
+
+		let max_mine = 10;
+		let max_mint = 10;
 
 		let mintIndexes = new Map<number, number[]>();
 		let mineColors = new Map(generateRGBSpectrum(width).map((color, index) => {

@@ -2,9 +2,9 @@
     "version": "0.0.0",
     "name": "colorglyph-sdk",
     "dependencies": {
-        "@stellar/freighter-api": "1.6.0",
+        "@stellar/freighter-api": "1.5.1",
         "buffer": "6.0.3",
-        "soroban-client": "github:ahalabs/js-soroban-client#fix/spec_enums"
+        "soroban-client": "1.0.0-beta.2"
     },
     "scripts": {
         "build": "node ./scripts/build.mjs"
@@ -15,6 +15,6 @@
     },
     "typings": "dist/types/index.d.ts",
     "devDependencies": {
-        "typescript": "5.2.2"
+        "typescript": "5.1.6"
     }
 }

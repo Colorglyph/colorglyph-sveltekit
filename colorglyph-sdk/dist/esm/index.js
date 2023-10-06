@@ -65,7 +65,7 @@ function parseError(message) {
 export const networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",
-        contractId: "CBLKUYT7K4RADZLNLIMTZD6FUVX2ZZF6MJVA3R7A2VZCDF4VPVK62DG7",
+        contractId: "CDSXSN5OWU4UHJLHZKWTZZSACTJSWTIQO3PZZLCKTNE5QOT3LFKIH2KG",
     }
 };
 const Errors = {
@@ -179,8 +179,6 @@ export class Contract {
                 ...options,
                 ...this.options,
                 parseResultXdr: (xdr) => {
-                    // xdr = typeof xdr === 'string' ? SorobanClient.xdr.ScVal.fromXDR(xdr, 'base64') : xdr
-                    // return new Ok(SorobanClient.scValToNative(xdr))
                     return new Ok(this.spec.funcResToNative("glyph_get", xdr));
                 },
             });
