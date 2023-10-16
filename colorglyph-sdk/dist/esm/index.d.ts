@@ -1,7 +1,7 @@
 import * as SorobanClient from 'soroban-client';
 import { ContractSpec, Address } from 'soroban-client';
 import { Buffer } from "buffer";
-import type { ResponseTypes, ClassOptions } from './method-options.js';
+import type { ClassOptions } from './method-options.js';
 export * from './invoke.js';
 export * from './method-options.js';
 export type u32 = number;
@@ -44,7 +44,7 @@ export declare class Err<E extends Error_ = Error_> implements Result<any, E> {
 export declare const networks: {
     readonly futurenet: {
         readonly networkPassphrase: "Test SDF Future Network ; October 2022";
-        readonly contractId: "CDSXSN5OWU4UHJLHZKWTZZSACTJSWTIQO3PZZLCKTNE5QOT3LFKIH2KG";
+        readonly contractId: "CCBL4VO5IRQHL6F2ALXHBYQCSBE52J6O6RXS4IRUUQZ5MOMR4QPVJ2LQ";
     };
 };
 export type StorageKey = {
@@ -55,16 +55,16 @@ export type StorageKey = {
     values: void;
 } | {
     tag: "Color";
-    values: readonly [Address, Address, u32];
+    values: readonly [string, string, u32];
 } | {
     tag: "Colors";
-    values: readonly [Address];
+    values: readonly [string];
 } | {
     tag: "Glyph";
     values: readonly [Buffer];
 } | {
     tag: "Dust";
-    values: readonly [Address];
+    values: readonly [string];
 } | {
     tag: "GlyphOwner";
     values: readonly [Buffer];
@@ -76,27 +76,27 @@ export type StorageKey = {
     values: readonly [Buffer];
 } | {
     tag: "AssetOffer";
-    values: readonly [Buffer, Address, i128];
+    values: readonly [Buffer, string, i128];
 };
 export type HashType = {
     tag: "Colors";
-    values: readonly [Address];
+    values: readonly [string];
 } | {
     tag: "Dust";
-    values: readonly [Address];
+    values: readonly [string];
 } | {
     tag: "Glyph";
     values: readonly [Buffer];
 };
 export type GlyphType = {
     tag: "Colors";
-    values: readonly [Map<Address, Map<u32, Array<u32>>>];
+    values: readonly [Map<string, Map<u32, Array<u32>>>];
 } | {
     tag: "Glyph";
     values: readonly [Glyph];
 };
 export interface Glyph {
-    colors: Map<Address, Map<u32, Array<u32>>>;
+    colors: Map<string, Map<u32, Array<u32>>>;
     length: u32;
     width: u32;
 }
@@ -105,30 +105,30 @@ export type OfferCreate = {
     values: readonly [Buffer, Offer];
 } | {
     tag: "Asset";
-    values: readonly [Buffer, Address, Address, i128];
+    values: readonly [Buffer, string, string, i128];
 };
 export type Offer = {
     tag: "Glyph";
     values: readonly [Buffer];
 } | {
     tag: "Asset";
-    values: readonly [Address, i128];
+    values: readonly [string, i128];
 } | {
     tag: "AssetSell";
-    values: readonly [Address, Address, i128];
+    values: readonly [string, string, i128];
 };
 export declare class Contract {
     readonly options: ClassOptions;
     spec: ContractSpec;
     constructor(options: ClassOptions);
-    initialize<R extends ResponseTypes = undefined>({ token_address, fee_address }: {
-        token_address: Address;
-        fee_address: Address;
+    initialize: <R extends "simulated" | "full" | undefined = undefined>({ token_address, fee_address }: {
+        token_address: string;
+        fee_address: string;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -136,21 +136,21 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
-    colorsMine<R extends ResponseTypes = undefined>({ miner, to, colors }: {
-        miner: Address;
-        to: Option<Address>;
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
+    colorsMine: <R extends "simulated" | "full" | undefined = undefined>({ miner, to, colors }: {
+        miner: string;
+        to: Option<string>;
         colors: Map<u32, u32>;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -158,21 +158,21 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
-    colorsTransfer<R extends ResponseTypes = undefined>({ from, to, colors }: {
-        from: Address;
-        to: Address;
-        colors: Array<readonly [Address, u32, u32]>;
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
+    colorsTransfer: <R extends "simulated" | "full" | undefined = undefined>({ from, to, colors }: {
+        from: string;
+        to: string;
+        colors: Array<readonly [string, u32, u32]>;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -180,21 +180,21 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
-    colorBalance<R extends ResponseTypes = undefined>({ owner, miner, color }: {
-        owner: Address;
-        miner: Option<Address>;
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
+    colorBalance: <R extends "simulated" | "full" | undefined = undefined>({ owner, miner, color }: {
+        owner: string;
+        miner: Option<string>;
         color: u32;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -202,22 +202,22 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? number : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : number>;
-    glyphMint<R extends ResponseTypes = undefined>({ minter, to, colors, width }: {
-        minter: Address;
-        to: Option<Address>;
-        colors: Map<Address, Map<u32, Array<u32>>>;
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? number : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : number>;
+    glyphMint: <R extends "simulated" | "full" | undefined = undefined>({ minter, to, colors, width }: {
+        minter: string;
+        to: Option<string>;
+        colors: Map<string, Map<u32, Array<u32>>>;
         width: Option<u32>;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -225,20 +225,20 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? Buffer : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Buffer>;
-    glyphTransfer<R extends ResponseTypes = undefined>({ to, hash_type }: {
-        to: Address;
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? Option<Buffer> : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Option<Buffer>>;
+    glyphTransfer: <R extends "simulated" | "full" | undefined = undefined>({ to, hash_type }: {
+        to: string;
         hash_type: HashType;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -246,20 +246,20 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
-    glyphScrape<R extends ResponseTypes = undefined>({ to, hash_type }: {
-        to: Option<Address>;
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
+    glyphScrape: <R extends "simulated" | "full" | undefined = undefined>({ to, hash_type }: {
+        to: Option<string>;
         hash_type: HashType;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -267,19 +267,19 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
-    glyphGet<R extends ResponseTypes = undefined>({ hash_type }: {
+        secondsToWait?: number | undefined;
+    }) => Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
+    glyphGet: <R extends "simulated" | "full" | undefined = undefined>({ hash_type }: {
         hash_type: HashType;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -287,20 +287,20 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<GlyphType, Error_> : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<GlyphType, Error_>)>;
-    offerPost<R extends ResponseTypes = undefined>({ sell, buy }: {
+        secondsToWait?: number | undefined;
+    }) => Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<GlyphType, Error_> | undefined : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<GlyphType, Error_> | undefined)>;
+    offerPost: <R extends "simulated" | "full" | undefined = undefined>({ sell, buy }: {
         sell: Offer;
         buy: Offer;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -308,20 +308,20 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<void, Error_> : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<void, Error_>)>;
-    offerDelete<R extends ResponseTypes = undefined>({ sell, buy }: {
+        secondsToWait?: number | undefined;
+    }) => Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<void, Error_> | undefined : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<void, Error_> | undefined)>;
+    offerDelete: <R extends "simulated" | "full" | undefined = undefined>({ sell, buy }: {
         sell: Offer;
         buy: Option<Offer>;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -329,20 +329,20 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<void, Error_> : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<void, Error_>)>;
-    offersGet<R extends ResponseTypes = undefined>({ sell, buy }: {
+        secondsToWait?: number | undefined;
+    }) => Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<void, Error_> | undefined : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<void, Error_> | undefined)>;
+    offersGet: <R extends "simulated" | "full" | undefined = undefined>({ sell, buy }: {
         sell: Offer;
         buy: Option<Offer>;
     }, options?: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
-        fee?: number;
+        fee?: number | undefined;
         /**
          * What type of response to return.
          *
@@ -350,10 +350,10 @@ export declare class Contract {
          *   - `'simulated'` will only simulate/preflight the transaction, even if it's a change/set method that requires auth/signing. Returns full preflight info.
          *   - `'full'` return the full RPC response, meaning either 1. the preflight info, if it's a view/read method that doesn't require auth/signing, or 2. the `sendTransaction` response, if there's a problem with sending the transaction or if you set `secondsToWait` to 0, or 3. the `getTransaction` response, if it's a change method with no `sendTransaction` errors and a positive `secondsToWait`.
          */
-        responseType?: R;
+        responseType?: R | undefined;
         /**
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
-        secondsToWait?: number;
-    }): Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<void, Error_> : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<void, Error_>)>;
+        secondsToWait?: number | undefined;
+    }) => Promise<Err<Error_> | (R extends undefined ? Err<Error_> | Ok<void, Error_> | undefined : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : Err<Error_> | Ok<void, Error_> | undefined)>;
 }

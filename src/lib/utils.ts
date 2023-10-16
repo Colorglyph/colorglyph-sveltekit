@@ -14,3 +14,18 @@ export function generateRGBSpectrum(steps: number) {
 
     return colorArray;
 }
+
+export function generateRandomSpectrum(steps: number) {
+    // Calculate the total length of the array
+    const totalLength = steps * steps;
+    
+    // Define the maximum value
+    const maxValue = Math.pow(256, 3) - 1;
+
+    // Generate an array of random numbers
+    const array = new Array(totalLength).fill(0).map(() => 
+        Math.floor(Math.random() * (maxValue + 1))
+    );
+
+    return array;
+}

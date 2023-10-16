@@ -8,7 +8,19 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"strict": true
+		"strict": true,
+		"lib": [
+			"ESNext"
+		],
+		"module": "esnext",
+		"target": "esnext",
+		"moduleResolution": "bundler",
+		"moduleDetection": "force",
+		"allowImportingTsExtensions": true,
+		"downlevelIteration": true,
+		"jsx": "preserve",
+		"allowSyntheticDefaultImports": true,
+		"noEmit": true
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//

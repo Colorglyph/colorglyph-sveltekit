@@ -92,7 +92,7 @@ function parseError(message: string): Err | undefined {
 export const networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",
-        contractId: "CDSXSN5OWU4UHJLHZKWTZZSACTJSWTIQO3PZZLCKTNE5QOT3LFKIH2KG",
+        contractId: "CCBL4VO5IRQHL6F2ALXHBYQCSBE52J6O6RXS4IRUUQZ5MOMR4QPVJ2LQ",
     }
 } as const
 
@@ -106,21 +106,21 @@ const Errors = {
   7: {message:""},
   8: {message:""}
 }
-export type StorageKey = {tag: "TokenAddress", values: void} | {tag: "FeeAddress", values: void} | {tag: "Color", values: readonly [Address, Address, u32]} | {tag: "Colors", values: readonly [Address]} | {tag: "Glyph", values: readonly [Buffer]} | {tag: "Dust", values: readonly [Address]} | {tag: "GlyphOwner", values: readonly [Buffer]} | {tag: "GlyphMinter", values: readonly [Buffer]} | {tag: "GlyphOffer", values: readonly [Buffer]} | {tag: "AssetOffer", values: readonly [Buffer, Address, i128]};
+export type StorageKey = {tag: "TokenAddress", values: void} | {tag: "FeeAddress", values: void} | {tag: "Color", values: readonly [string, string, u32]} | {tag: "Colors", values: readonly [string]} | {tag: "Glyph", values: readonly [Buffer]} | {tag: "Dust", values: readonly [string]} | {tag: "GlyphOwner", values: readonly [Buffer]} | {tag: "GlyphMinter", values: readonly [Buffer]} | {tag: "GlyphOffer", values: readonly [Buffer]} | {tag: "AssetOffer", values: readonly [Buffer, string, i128]};
 
-export type HashType = {tag: "Colors", values: readonly [Address]} | {tag: "Dust", values: readonly [Address]} | {tag: "Glyph", values: readonly [Buffer]};
+export type HashType = {tag: "Colors", values: readonly [string]} | {tag: "Dust", values: readonly [string]} | {tag: "Glyph", values: readonly [Buffer]};
 
-export type GlyphType = {tag: "Colors", values: readonly [Map<Address, Map<u32, Array<u32>>>]} | {tag: "Glyph", values: readonly [Glyph]};
+export type GlyphType = {tag: "Colors", values: readonly [Map<string, Map<u32, Array<u32>>>]} | {tag: "Glyph", values: readonly [Glyph]};
 
 export interface Glyph {
-  colors: Map<Address, Map<u32, Array<u32>>>;
+  colors: Map<string, Map<u32, Array<u32>>>;
   length: u32;
   width: u32;
 }
 
-export type OfferCreate = {tag: "Glyph", values: readonly [Buffer, Offer]} | {tag: "Asset", values: readonly [Buffer, Address, Address, i128]};
+export type OfferCreate = {tag: "Glyph", values: readonly [Buffer, Offer]} | {tag: "Asset", values: readonly [Buffer, string, string, i128]};
 
-export type Offer = {tag: "Glyph", values: readonly [Buffer]} | {tag: "Asset", values: readonly [Address, i128]} | {tag: "AssetSell", values: readonly [Address, Address, i128]};
+export type Offer = {tag: "Glyph", values: readonly [Buffer]} | {tag: "Asset", values: readonly [string, i128]} | {tag: "AssetSell", values: readonly [string, string, i128]};
 
 
 export class Contract {
@@ -147,7 +147,7 @@ export class Contract {
         "AAAAAgAAAAAAAAAAAAAABU9mZmVyAAAAAAAAAwAAAAEAAAAAAAAABUdseXBoAAAAAAAAAQAAA+4AAAAgAAAAAQAAAAAAAAAFQXNzZXQAAAAAAAACAAAAEwAAAAsAAAABAAAAAAAAAAlBc3NldFNlbGwAAAAAAAADAAAAEwAAABMAAAAL"
             ]);
     }
-    async initialize<R extends ResponseTypes = undefined>({token_address, fee_address}: {token_address: Address, fee_address: Address}, options: {
+    initialize = async <R extends ResponseTypes = undefined>({token_address, fee_address}: {token_address: string, fee_address: string}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -164,10 +164,10 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'initialize',
-            args: this.spec.funcArgsToScVals("initialize", {token_address, fee_address}),
+            args: this.spec.funcArgsToScVals("initialize", {token_address: new Address(token_address), fee_address: new Address(fee_address)}),
             ...options,
             ...this.options,
             parseResultXdr: () => {},
@@ -175,7 +175,7 @@ export class Contract {
     }
 
 
-    async colorsMine<R extends ResponseTypes = undefined>({miner, to, colors}: {miner: Address, to: Option<Address>, colors: Map<u32, u32>}, options: {
+    colorsMine = async <R extends ResponseTypes = undefined>({miner, to, colors}: {miner: string, to: Option<string>, colors: Map<u32, u32>}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -192,10 +192,10 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'colors_mine',
-            args: this.spec.funcArgsToScVals("colors_mine", {miner, to, colors}),
+            args: this.spec.funcArgsToScVals("colors_mine", {miner: new Address(miner), to, colors}),
             ...options,
             ...this.options,
             parseResultXdr: () => {},
@@ -203,7 +203,7 @@ export class Contract {
     }
 
 
-    async colorsTransfer<R extends ResponseTypes = undefined>({from, to, colors}: {from: Address, to: Address, colors: Array<readonly [Address, u32, u32]>}, options: {
+    colorsTransfer = async <R extends ResponseTypes = undefined>({from, to, colors}: {from: string, to: string, colors: Array<readonly [string, u32, u32]>}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -220,10 +220,10 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'colors_transfer',
-            args: this.spec.funcArgsToScVals("colors_transfer", {from, to, colors}),
+            args: this.spec.funcArgsToScVals("colors_transfer", {from: new Address(from), to: new Address(to), colors}),
             ...options,
             ...this.options,
             parseResultXdr: () => {},
@@ -231,7 +231,7 @@ export class Contract {
     }
 
 
-    async colorBalance<R extends ResponseTypes = undefined>({owner, miner, color}: {owner: Address, miner: Option<Address>, color: u32}, options: {
+    colorBalance = async <R extends ResponseTypes = undefined>({owner, miner, color}: {owner: string, miner: Option<string>, color: u32}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -248,10 +248,10 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'color_balance',
-            args: this.spec.funcArgsToScVals("color_balance", {owner, miner, color}),
+            args: this.spec.funcArgsToScVals("color_balance", {owner: new Address(owner), miner, color}),
             ...options,
             ...this.options,
             parseResultXdr: (xdr): u32 => {
@@ -261,7 +261,7 @@ export class Contract {
     }
 
 
-    async glyphMint<R extends ResponseTypes = undefined>({minter, to, colors, width}: {minter: Address, to: Option<Address>, colors: Map<Address, Map<u32, Array<u32>>>, width: Option<u32>}, options: {
+    glyphMint = async <R extends ResponseTypes = undefined>({minter, to, colors, width}: {minter: string, to: Option<string>, colors: Map<string, Map<u32, Array<u32>>>, width: Option<u32>}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -278,10 +278,10 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'glyph_mint',
-            args: this.spec.funcArgsToScVals("glyph_mint", {minter, to, colors, width}),
+            args: this.spec.funcArgsToScVals("glyph_mint", {minter: new Address(minter), to, colors, width}),
             ...options,
             ...this.options,
             parseResultXdr: (xdr): Option<Buffer> => {
@@ -291,7 +291,7 @@ export class Contract {
     }
 
 
-    async glyphTransfer<R extends ResponseTypes = undefined>({to, hash_type}: {to: Address, hash_type: HashType}, options: {
+    glyphTransfer = async <R extends ResponseTypes = undefined>({to, hash_type}: {to: string, hash_type: HashType}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -308,10 +308,10 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'glyph_transfer',
-            args: this.spec.funcArgsToScVals("glyph_transfer", {to, hash_type}),
+            args: this.spec.funcArgsToScVals("glyph_transfer", {to: new Address(to), hash_type}),
             ...options,
             ...this.options,
             parseResultXdr: () => {},
@@ -319,7 +319,7 @@ export class Contract {
     }
 
 
-    async glyphScrape<R extends ResponseTypes = undefined>({to, hash_type}: {to: Option<Address>, hash_type: HashType}, options: {
+    glyphScrape = async <R extends ResponseTypes = undefined>({to, hash_type}: {to: Option<string>, hash_type: HashType}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -336,7 +336,7 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     return await invoke({
             method: 'glyph_scrape',
             args: this.spec.funcArgsToScVals("glyph_scrape", {to, hash_type}),
@@ -347,7 +347,7 @@ export class Contract {
     }
 
 
-    async glyphGet<R extends ResponseTypes = undefined>({hash_type}: {hash_type: HashType}, options: {
+    glyphGet = async <R extends ResponseTypes = undefined>({hash_type}: {hash_type: HashType}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -364,7 +364,7 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     try {
             return await invoke({
             method: 'glyph_get',
@@ -376,16 +376,14 @@ export class Contract {
             },
         });
         } catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err) return err;
-            }
+            let err = parseError(e.toString());
+            if (err) return err;
             throw e;
         }
     }
 
 
-    async offerPost<R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Offer}, options: {
+    offerPost = async <R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Offer}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -402,7 +400,7 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     try {
             return await invoke({
             method: 'offer_post',
@@ -414,16 +412,14 @@ export class Contract {
             },
         });
         } catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err) return err;
-            }
+            let err = parseError(e.toString());
+            if (err) return err;
             throw e;
         }
     }
 
 
-    async offerDelete<R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Option<Offer>}, options: {
+    offerDelete = async <R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Option<Offer>}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -440,7 +436,7 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     try {
             return await invoke({
             method: 'offer_delete',
@@ -452,16 +448,14 @@ export class Contract {
             },
         });
         } catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err) return err;
-            }
+            let err = parseError(e.toString());
+            if (err) return err;
             throw e;
         }
     }
 
 
-    async offersGet<R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Option<Offer>}, options: {
+    offersGet = async <R extends ResponseTypes = undefined>({sell, buy}: {sell: Offer, buy: Option<Offer>}, options: {
         /**
          * The fee to pay for the transaction. Default: 100.
          */
@@ -478,7 +472,7 @@ export class Contract {
          * If the simulation shows that this invocation requires auth/signing, `invoke` will wait `secondsToWait` seconds for the transaction to complete before giving up and returning the incomplete {@link SorobanClient.SorobanRpc.GetTransactionResponse} results (or attempting to parse their probably-missing XDR with `parseResultXdr`, depending on `responseType`). Set this to `0` to skip waiting altogether, which will return you {@link SorobanClient.SorobanRpc.SendTransactionResponse} more quickly, before the transaction has time to be included in the ledger. Default: 10.
          */
         secondsToWait?: number
-    } = {}) {
+    } = {}) => {
                     try {
             return await invoke({
             method: 'offers_get',
@@ -490,10 +484,8 @@ export class Contract {
             },
         });
         } catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err) return err;
-            }
+            let err = parseError(e.toString());
+            if (err) return err;
             throw e;
         }
     }

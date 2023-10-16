@@ -84,7 +84,7 @@ function parseError(message) {
 exports.networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",
-        contractId: "CDSXSN5OWU4UHJLHZKWTZZSACTJSWTIQO3PZZLCKTNE5QOT3LFKIH2KG",
+        contractId: "CCBL4VO5IRQHL6F2ALXHBYQCSBE52J6O6RXS4IRUUQZ5MOMR4QPVJ2LQ",
     }
 };
 const Errors = {
@@ -123,65 +123,65 @@ class Contract {
             "AAAAAgAAAAAAAAAAAAAABU9mZmVyAAAAAAAAAwAAAAEAAAAAAAAABUdseXBoAAAAAAAAAQAAA+4AAAAgAAAAAQAAAAAAAAAFQXNzZXQAAAAAAAACAAAAEwAAAAsAAAABAAAAAAAAAAlBc3NldFNlbGwAAAAAAAADAAAAEwAAABMAAAAL"
         ]);
     }
-    async initialize({ token_address, fee_address }, options = {}) {
+    initialize = async ({ token_address, fee_address }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'initialize',
-            args: this.spec.funcArgsToScVals("initialize", { token_address, fee_address }),
+            args: this.spec.funcArgsToScVals("initialize", { token_address: new soroban_client_1.Address(token_address), fee_address: new soroban_client_1.Address(fee_address) }),
             ...options,
             ...this.options,
             parseResultXdr: () => { },
         });
-    }
-    async colorsMine({ miner, to, colors }, options = {}) {
+    };
+    colorsMine = async ({ miner, to, colors }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'colors_mine',
-            args: this.spec.funcArgsToScVals("colors_mine", { miner, to, colors }),
+            args: this.spec.funcArgsToScVals("colors_mine", { miner: new soroban_client_1.Address(miner), to, colors }),
             ...options,
             ...this.options,
             parseResultXdr: () => { },
         });
-    }
-    async colorsTransfer({ from, to, colors }, options = {}) {
+    };
+    colorsTransfer = async ({ from, to, colors }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'colors_transfer',
-            args: this.spec.funcArgsToScVals("colors_transfer", { from, to, colors }),
+            args: this.spec.funcArgsToScVals("colors_transfer", { from: new soroban_client_1.Address(from), to: new soroban_client_1.Address(to), colors }),
             ...options,
             ...this.options,
             parseResultXdr: () => { },
         });
-    }
-    async colorBalance({ owner, miner, color }, options = {}) {
+    };
+    colorBalance = async ({ owner, miner, color }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'color_balance',
-            args: this.spec.funcArgsToScVals("color_balance", { owner, miner, color }),
+            args: this.spec.funcArgsToScVals("color_balance", { owner: new soroban_client_1.Address(owner), miner, color }),
             ...options,
             ...this.options,
             parseResultXdr: (xdr) => {
                 return this.spec.funcResToNative("color_balance", xdr);
             },
         });
-    }
-    async glyphMint({ minter, to, colors, width }, options = {}) {
+    };
+    glyphMint = async ({ minter, to, colors, width }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'glyph_mint',
-            args: this.spec.funcArgsToScVals("glyph_mint", { minter, to, colors, width }),
+            args: this.spec.funcArgsToScVals("glyph_mint", { minter: new soroban_client_1.Address(minter), to, colors, width }),
             ...options,
             ...this.options,
             parseResultXdr: (xdr) => {
                 return this.spec.funcResToNative("glyph_mint", xdr);
             },
         });
-    }
-    async glyphTransfer({ to, hash_type }, options = {}) {
+    };
+    glyphTransfer = async ({ to, hash_type }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'glyph_transfer',
-            args: this.spec.funcArgsToScVals("glyph_transfer", { to, hash_type }),
+            args: this.spec.funcArgsToScVals("glyph_transfer", { to: new soroban_client_1.Address(to), hash_type }),
             ...options,
             ...this.options,
             parseResultXdr: () => { },
         });
-    }
-    async glyphScrape({ to, hash_type }, options = {}) {
+    };
+    glyphScrape = async ({ to, hash_type }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'glyph_scrape',
             args: this.spec.funcArgsToScVals("glyph_scrape", { to, hash_type }),
@@ -189,8 +189,8 @@ class Contract {
             ...this.options,
             parseResultXdr: () => { },
         });
-    }
-    async glyphGet({ hash_type }, options = {}) {
+    };
+    glyphGet = async ({ hash_type }, options = {}) => {
         try {
             return await (0, invoke_js_1.invoke)({
                 method: 'glyph_get',
@@ -203,15 +203,13 @@ class Contract {
             });
         }
         catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err)
-                    return err;
-            }
+            let err = parseError(e.toString());
+            if (err)
+                return err;
             throw e;
         }
-    }
-    async offerPost({ sell, buy }, options = {}) {
+    };
+    offerPost = async ({ sell, buy }, options = {}) => {
         try {
             return await (0, invoke_js_1.invoke)({
                 method: 'offer_post',
@@ -224,15 +222,13 @@ class Contract {
             });
         }
         catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err)
-                    return err;
-            }
+            let err = parseError(e.toString());
+            if (err)
+                return err;
             throw e;
         }
-    }
-    async offerDelete({ sell, buy }, options = {}) {
+    };
+    offerDelete = async ({ sell, buy }, options = {}) => {
         try {
             return await (0, invoke_js_1.invoke)({
                 method: 'offer_delete',
@@ -245,15 +241,13 @@ class Contract {
             });
         }
         catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err)
-                    return err;
-            }
+            let err = parseError(e.toString());
+            if (err)
+                return err;
             throw e;
         }
-    }
-    async offersGet({ sell, buy }, options = {}) {
+    };
+    offersGet = async ({ sell, buy }, options = {}) => {
         try {
             return await (0, invoke_js_1.invoke)({
                 method: 'offers_get',
@@ -266,13 +260,11 @@ class Contract {
             });
         }
         catch (e) {
-            if (typeof e === 'string') {
-                let err = parseError(e);
-                if (err)
-                    return err;
-            }
+            let err = parseError(e.toString());
+            if (err)
+                return err;
             throw e;
         }
-    }
+    };
 }
 exports.Contract = Contract;
