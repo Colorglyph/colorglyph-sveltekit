@@ -17,15 +17,25 @@ export function generateRGBSpectrum(steps: number) {
 
 export function generateRandomSpectrum(steps: number) {
     // Calculate the total length of the array
-    const totalLength = steps * steps;
+    // const totalLength = steps * steps
     
     // Define the maximum value
-    const maxValue = Math.pow(256, 3) - 1;
+    const maxValue = Math.pow(256, 3) - 1
 
     // Generate an array of random numbers
-    const array = new Array(totalLength).fill(0).map(() => 
-        Math.floor(Math.random() * (maxValue + 1))
-    );
+    // const array = new Array(totalLength).fill(0).map(() => 
+    //     Math.floor(Math.random() * (maxValue + 1))
+    // )
 
-    return array;
+    const array = []
+
+    for (let i = 0; i < steps; i++) {
+        let color = Math.floor(Math.random() * (maxValue + 1))
+
+        for (let j = 0; j < steps; j++) {
+            array.push(color)
+        }
+    }
+
+    return array
 }

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { generateRandomSpectrum } from "$lib/utils"
     import { fetcher } from 'itty-fetcher'
+    import { PUBLIC_API_BASE } from '$env/static/public'
 
-    const rpc = fetcher({base: 'http://localhost:8787'})
+    const api = fetcher({base: PUBLIC_API_BASE})
 
-    let width: number = 4
+    let width: number = 9
 	let palette: number[] = []
     let hash: string|null = null
     let json: any = null
@@ -22,7 +23,7 @@
 
     async function mint() {
         json = null
-        await rpc.post('/mint', {
+        await api.post('/mint', {
             palette,
             width,
             secret: 'SCIG6EFQNNZK3DHVDCY3DEINZFPMSG5HEJNYJTUTCB5BB32WEFQ3N6BI' // GBVRCCODAXSSO54KIGIKPI537U6OR3G2PT3Z4MALYZXILW7RALKHFR2Z
@@ -34,7 +35,7 @@
         })
     }
     async function getStatus() {
-        await rpc.get(`/mint/${hash}`)
+        await api.get(`/mint/${hash}`)
         .then((res: any) => {
             console.log(res)
             json = res
@@ -44,8 +45,8 @@
 
 <div class="flex flex-col max-w-xs [&>*]:mb-1">
     <label>
-        {width}
         <input type="range" min="1" max="40" bind:value={width}>
+        {width}
     </label>
     
     <div class="flex flex-col max-w-xs [&>*]:mb-1">
