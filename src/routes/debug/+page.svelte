@@ -2,7 +2,7 @@
 	import { generateRGBSpectrum } from '$lib/utils';
 	import { Contract } from 'colorglyph-sdk';
 	import type { Ok, HashType, GlyphType, Offer } from 'colorglyph-sdk';
-	import { Keypair, Networks, Transaction, xdr } from 'soroban-client';
+	import { Keypair, Networks, Transaction } from 'soroban-client';
 
 	const ME = 'GBGP5SD75TDB2ZL7JDJEFPSWDBEQRDJ4757ZXL57TOOQJSMWROT5JYKD'; // 'GDBDQ55RL3RJ3566YJGAVOTKF7XORMHGTHH72XCALBSTJM6IPUJHGRIZ' // 'GCBDVRWCTRZENDMYBOLAC3PZBP6NGGSILDZTYAUCJUWUGX27BG2VDPID';
 	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2'); // Keypair.fromSecret('SDCZMHTIDUWC4KA2MPQPTDZV2BCGKUBI6XI5BDISC4R2MR5T6QKVVVAB') // Keypair.fromSecret('SBQJEN6RVWCB7KUPI6Y4XVBQVHEDQVT2KS2UUIYVQOTWP5EUCNFG6DEJ');

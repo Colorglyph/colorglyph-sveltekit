@@ -23,12 +23,14 @@
     async function getGlyphs() {
         await api.get('/glyphs')
         .then((res: any) => {
+            console.log(res)
             glyphs = res
         })
     }
     async function getStatus(glyph: Glyph) {
         await api.get(`/mint/${glyph.metadata.id}`)
         .then((res: any) => {
+            console.log(res)
             glyph.metadata.status = res.status
             glyphs = glyphs
         })
