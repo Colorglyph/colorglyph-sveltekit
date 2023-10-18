@@ -45,7 +45,7 @@
                 ? 'bg-red-500'
                 : glyph.metadata.status === 'minting'
                 ? 'bg-yellow-500'
-                : glyph.metadata.status === 'complete'
+                : glyph.metadata.status === 'complete' || glyph.metadata.status === 'minted'
                 ? 'bg-green-500'
                 : 'bg-black' 
             }"></span>
