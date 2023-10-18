@@ -37,7 +37,7 @@
     }
 </script>
 
-<div class="grid grid-cols-8 gap-1">
+<div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1">
     {#each glyphs as glyph }
         <div class="relative" on:click={() => getStatus(glyph)}>
             <span class="w-3 h-3 rounded-full absolute top-1 left-1 border-2 border-white {
