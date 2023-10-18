@@ -10,6 +10,7 @@
 	let palette: number[] = []
     let hash: string|null = null
     let json: any = null 
+    let minting: boolean = false
 
     $: {
         width
@@ -24,6 +25,7 @@
 
     async function mint() {
         json = null
+        minting = true
 
         const kp = Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
@@ -39,6 +41,7 @@
             hash = res
             getStatus()
         })
+        .finally(() => minting = false)
     }
     async function getStatus() {
         await api.get(`/mint/${hash}`)
@@ -68,7 +71,7 @@
     </div>
     
     <button class="bg-black text-white" on:click={generatePalette}>New Palette</button>
-    <button class="bg-red-500 text-white" on:click={mint}>Mint</button>
+    <button class="bg-red-500 text-white" on:click={mint}>{minting ? '...' : 'Mint'}</button>
     {#if hash}
         <button class="bg-black text-white" on:click={getStatus}>Get Status</button>
     {/if}
