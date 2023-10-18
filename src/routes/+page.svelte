@@ -7,20 +7,21 @@
     const api = fetcher({base: PUBLIC_API_BASE})
 
     let width: number = 9
+    let detail: number = 3
 	let palette: number[] = []
     let hash: string|null = null
     let json: any = null 
     let minting: boolean = false
 
     $: {
-        width
+        detail = Math.min(detail, width)
         generatePalette()
     }
 
     generatePalette()
 
     function generatePalette() {
-        palette = generateRandomSpectrum(width)
+        palette = generateRandomSpectrum(width, detail)
     }
 
     async function mint() {
@@ -56,6 +57,10 @@
     <label>
         <input type="range" min="1" max="40" bind:value={width}>
         {width}
+    </label>
+    <label>
+        <input type="range" min="1" max="{width}" bind:value={detail}>
+        {detail}
     </label>
     
     <div class="flex flex-col max-w-xs [&>*]:mb-1">

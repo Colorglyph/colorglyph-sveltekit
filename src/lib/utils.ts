@@ -15,7 +15,7 @@ export function generateRGBSpectrum(steps: number) {
     return colorArray;
 }
 
-export function generateRandomSpectrum(steps: number) {
+export function generateRandomSpectrum(width: number, detail: number) {
     // Calculate the total length of the array
     // const totalLength = steps * steps
     
@@ -29,13 +29,13 @@ export function generateRandomSpectrum(steps: number) {
 
     const array = []
 
-    for (let i = 0; i < Math.floor(steps * 2); i++) {
+    for (let i = 0; i < Math.ceil(width * detail); i++) {
         const color = Math.floor(Math.random() * (maxValue + 1))
 
-        for (let j = 0; j < Math.floor(steps / 2); j++) {
+        for (let j = 0; j < Math.ceil(width / detail); j++) {
             array.push(color)
         }
     }
 
-    return array
+    return array.slice(0, width * width)
 }
