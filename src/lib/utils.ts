@@ -29,10 +29,10 @@ export function generateRandomSpectrum(steps: number) {
 
     const array = []
 
-    for (let i = 0; i < steps * 2; i++) {
-        let color = Math.floor(Math.random() * (maxValue + 1))
+    for (let i = 0; i < Math.floor(steps * 2); i++) {
+        const color = Math.floor(Math.random() * (maxValue + 1))
 
-        for (let j = 0; j < steps / 2; j++) {
+        for (let j = 0; j < Math.floor(steps / 2); j++) {
             array.push(color)
         }
     }
