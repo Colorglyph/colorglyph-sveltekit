@@ -2,13 +2,14 @@
 	import { generateRandomSpectrum } from "$lib/utils"
     import { fetcher } from 'itty-fetcher'
     import { PUBLIC_API_BASE } from '$env/static/public'
+    import { Keypair } from 'soroban-client'
 
     const api = fetcher({base: PUBLIC_API_BASE})
 
     let width: number = 9
 	let palette: number[] = []
     let hash: string|null = null
-    let json: any = null
+    let json: any = null 
 
     $: {
         width
@@ -23,10 +24,15 @@
 
     async function mint() {
         json = null
+
+        const kp = Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
+
+        await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
+
         await api.post('/mint', {
             palette,
             width,
-            secret: 'SCIG6EFQNNZK3DHVDCY3DEINZFPMSG5HEJNYJTUTCB5BB32WEFQ3N6BI' // GBVRCCODAXSSO54KIGIKPI537U6OR3G2PT3Z4MALYZXILW7RALKHFR2Z
+            secret: kp.secret()
         })
         .then((res: any) => {
             console.log(res)
