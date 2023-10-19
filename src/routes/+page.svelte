@@ -83,5 +83,7 @@
     {#if hash}
         <button class="bg-black text-white" on:click={getStatus}>Get Status</button>
     {/if}
-    <pre>{JSON.stringify(json, null, 2)}</pre>
+    {#if json}
+        <pre>{JSON.stringify(json, null, 2)}</pre>
+    {/if}    
 </div>
