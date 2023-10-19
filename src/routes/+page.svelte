@@ -7,7 +7,7 @@
     const api = fetcher({base: PUBLIC_API_BASE})
 
     let width: number = 9
-    let detail: number = 3
+    let detail: number = 2
 	let palette: number[] = []
     let hash: string|null = null
     let json: any = null 
@@ -27,6 +27,9 @@
     async function mint() {
         json = null
         minting = true
+
+        // TODO we've added the ability to separate out destinations from source accounts
+        // so we should separate out the final destination of colors and glyphs from the source accounts that pay for and progressively mint them
 
         const kp = Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 

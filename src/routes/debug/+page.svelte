@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { generateRGBSpectrum } from '$lib/utils';
-	import { Contract } from 'colorglyph-sdk';
-	import type { Ok, HashType, GlyphType, Offer } from 'colorglyph-sdk';
-	import { Keypair, Networks, Transaction } from 'soroban-client';
+	import { generateRGBSpectrum } from '$lib/utils'
+	import { Contract } from 'colorglyph-sdk'
+	import type { Ok, HashType, GlyphType, Offer } from 'colorglyph-sdk'
+	import { Keypair, Networks, Transaction } from 'soroban-client'
 
-	const ME = 'GBGP5SD75TDB2ZL7JDJEFPSWDBEQRDJ4757ZXL57TOOQJSMWROT5JYKD'; // 'GDBDQ55RL3RJ3566YJGAVOTKF7XORMHGTHH72XCALBSTJM6IPUJHGRIZ' // 'GCBDVRWCTRZENDMYBOLAC3PZBP6NGGSILDZTYAUCJUWUGX27BG2VDPID';
-	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2'); // Keypair.fromSecret('SDCZMHTIDUWC4KA2MPQPTDZV2BCGKUBI6XI5BDISC4R2MR5T6QKVVVAB') // Keypair.fromSecret('SBQJEN6RVWCB7KUPI6Y4XVBQVHEDQVT2KS2UUIYVQOTWP5EUCNFG6DEJ');
-	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y';
-	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC');
-	const CONTRACTID = 'CBWYBBBXPDYXDH2HMRAYNSDBVMLGS4C7PFGGIZU6PK4HCJUPE7UKILHY' // 'CDSXSN5OWU4UHJLHZKWTZZSACTJSWTIQO3PZZLCKTNE5QOT3LFKIH2KG',
-	const XLM = 'CDMLFMKMMD7MWZP3FKUBZPVHTUEDLSX4BYGYKH4GCESXYHS3IHQ4EIG4'; // 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT';
+	const ME = 'GBGP5SD75TDB2ZL7JDJEFPSWDBEQRDJ4757ZXL57TOOQJSMWROT5JYKD'
+	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2')
+	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y'
+	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
+	const CONTRACTID = 'CBWYBBBXPDYXDH2HMRAYNSDBVMLGS4C7PFGGIZU6PK4HCJUPE7UKILHY'
+	const XLM = 'CDMLFMKMMD7MWZP3FKUBZPVHTUEDLSX4BYGYKH4GCESXYHS3IHQ4EIG4'
 
 	let GLYPH: string = 'd58094fd3791508e4af6a2b2e278dea70c3fd6a0fa8db5ba47f07058cb7b87a3';
 
@@ -34,7 +34,7 @@
 			};
 		}
 		async signTransaction(xdr: string) {
-			const transaction = new Transaction(xdr, Networks.FUTURENET)
+			const transaction = new Transaction(xdr, Networks.STANDALONE)
 
 			transaction.sign(ME_kp);
 
@@ -44,8 +44,8 @@
 
 	const ColorglyphSDK = new Contract({
 		contractId: CONTRACTID,
-		networkPassphrase: Networks.FUTURENET,
-		rpcUrl: 'https://rpc-futurenet.stellar.org',
+		networkPassphrase: Networks.STANDALONE,
+		rpcUrl: 'http://localhost:8000/soroban/rpc',
 		wallet: new Wallet()
 	});
 
