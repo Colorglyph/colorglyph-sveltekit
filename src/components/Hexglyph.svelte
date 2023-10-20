@@ -1,7 +1,7 @@
-<script>
-    export let width;
-    export let px;
-    export let palette;
+<script lang="ts">
+    export let width: number
+    export let px: number
+    export let palette: string[]
 </script>
 
 <ul

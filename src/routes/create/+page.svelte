@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
     import { countBy } from "lodash-es";
     import { onMount } from "svelte";
-    import { writable, derived } from "svelte/store";
+    import { writable, derived, type Writable } from "svelte/store";
 
     // import { token } from '../../@store/user'
     // import { handleResponse } from '../../@js/utils'
@@ -11,7 +11,7 @@
     const width = writable(16);
     // const name = writable('')
     // const description = writable('')
-    const palette = writable([]);
+    const palette: Writable<string[]> = writable([]);
 
     const colors = derived(palette, (p) => {
         return Object.entries(countBy(p)).map(([hex, count]) => ({
@@ -29,7 +29,9 @@
 
     onMount(() => {
         if (localStorage.hasOwnProperty("smol.xyz_createWidth"))
-            width.set(localStorage.getItem("smol.xyz_createWidth"));
+            width.set(
+                Number(localStorage.getItem("smol.xyz_createWidth") || 0)
+            );
 
         //   if (localStorage.hasOwnProperty('smol.xyz_createName'))
         //     name.set(localStorage.getItem('smol.xyz_createName'))
@@ -39,11 +41,13 @@
 
         if (localStorage.hasOwnProperty("smol.xyz_createPalette"))
             palette.set(
-                JSON.parse(localStorage.getItem("smol.xyz_createPalette"))
+                JSON.parse(
+                    localStorage.getItem("smol.xyz_createPalette") || "[]"
+                )
             );
 
         width.subscribe((w) => {
-            localStorage.setItem("smol.xyz_createWidth", w);
+            localStorage.setItem("smol.xyz_createWidth", w.toString());
 
             palette.update((p) =>
                 new Array(Math.pow(w, 2))
@@ -59,7 +63,7 @@
         );
     });
 
-    function colorPixel(e, i) {
+    function colorPixel(e: MouseEvent, i: number) {
         if (e.buttons === 1 || e.type === "mousedown") {
             if ($palette[i] === color)
                 palette.update((p) => {
