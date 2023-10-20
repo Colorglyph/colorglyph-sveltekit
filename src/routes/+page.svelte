@@ -1,4 +1,7 @@
 <script lang="ts">
+    // TODO use a loader to prepopulate the data or just make the whole site static
+    // currently we're double loading stuff. Once on the server and again on the client
+
 	import { generateRandomSpectrum } from "$lib/utils"
     import { fetcher } from 'itty-fetcher'
     import { PUBLIC_API_BASE } from '$env/static/public'
@@ -26,6 +29,7 @@
 
     async function mint() {
         json = null
+        hash = null
         minting = true
 
         // TODO we've added the ability to separate out destinations from source accounts
