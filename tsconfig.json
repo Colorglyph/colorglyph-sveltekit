@@ -12,6 +12,9 @@
 		"lib": [
 			"ESNext"
 		],
+		"types": [
+			"@types/lodash-es"
+		],
 		"module": "esnext",
 		"target": "esnext",
 		"moduleResolution": "bundler",
