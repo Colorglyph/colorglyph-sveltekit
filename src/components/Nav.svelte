@@ -9,14 +9,12 @@
         href="/">Home</a
     >
 
-    {#if dev}
-        <a
-            class={$page.route.id == "/create"
-                ? "underline text-red-500"
-                : "text-white"}
-            href="/create">Create</a
-        >
-    {/if}
+    <a
+        class={$page.route.id == "/create"
+            ? "underline text-red-500"
+            : "text-white"}
+        href="/create">Create</a
+    >
 
     <a
         class={$page.route.id == "/catalog"

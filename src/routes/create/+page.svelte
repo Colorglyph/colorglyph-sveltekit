@@ -3,15 +3,19 @@
     import { onMount } from "svelte";
     import { writable, derived, type Writable } from "svelte/store";
 
-    // import { token } from '../../@store/user'
-    // import { handleResponse } from '../../@js/utils'
-
     import HexGlyph from "../../components/Hexglyph.svelte";
+    import { Keypair } from "soroban-client";
+    import { fetcher } from 'itty-fetcher'
+    import { PUBLIC_API_BASE } from '$env/static/public'
+
+    const api = fetcher({base: PUBLIC_API_BASE})
 
     const width = writable(16);
-    // const name = writable('')
-    // const description = writable('')
     const palette: Writable<string[]> = writable([]);
+
+    let hash: string|null = null
+    let json: any = null
+    let minting: boolean = false
 
     const colors = derived(palette, (p) => {
         return Object.entries(countBy(p)).map(([hex, count]) => ({
@@ -81,32 +85,39 @@
     function erase() {
         localStorage.removeItem("smol.xyz_createPalette");
         palette.set(new Array(Math.pow($width, 2)).fill("#ffffff"));
-        //   name.set('')
-        //   description.set('')
     }
 
-    // function mint() {
-    //   if (!$token)
-    //     return alert('Please log in first')
+    async function mint() {
+        json = null
+        hash = null
+        minting = true
 
-    //   return fetch('/create', {
-    //     method: 'POST',
-    //     headers: {
-    //       Accept: 'application/json',
-    //       Authorization: `Bearer ${$token}`,
-    //       'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify({
-    //       palette: $palette,
-    //       width: $width,
-    //       name: $name,
-    //       description: $description
-    //     })
-    //   })
-    //   .then(handleResponse)
-    //   .then(erase)
-    // }
-    function mint() {}
+        // TODO we've added the ability to separate out destinations from source accounts
+        // so we should separate out the final destination of colors and glyphs from the source accounts that pay for and progressively mint them
+
+        const kp = Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
+
+        await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
+
+        await api.post('/mint', {
+            palette: $palette.map((hex) => parseInt(hex.replace("#", ""), 16)),
+            width: $width,
+            secret: kp.secret()
+        })
+        .then((res: any) => {
+            console.log(res)
+            hash = res
+            check()
+        })
+        .finally(() => minting = false)
+    }
+    async function check() {
+        await api.get(`/mint/${hash}`)
+        .then((res: any) => {
+            console.log(res)
+            json = res
+        })
+    }
 </script>
 
 <div class="flex flex-col items-start">
@@ -203,7 +214,18 @@
         >
         <button
             on:click={mint}
-            class="mr-2 bg-black text-white py-1 px-2 rounded">Save</button
+            disabled={minting}
+            class="mr-2 bg-black text-white py-1 px-2 rounded disabled:bg-gray-500">Mint</button
         >
+        {#if hash}
+            <button
+                on:click={check}
+                class="mr-2 bg-black text-white py-1 px-2 rounded">Check</button
+            >
+        {/if}
     </div>
-</div>
+
+    {#if json}
+        <pre>{JSON.stringify(json, null, 2)}</pre>
+    {/if}
+</div> 
