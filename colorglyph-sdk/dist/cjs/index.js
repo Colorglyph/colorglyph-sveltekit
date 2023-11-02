@@ -84,7 +84,7 @@ function parseError(message) {
 exports.networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",
-        contractId: "CCBL4VO5IRQHL6F2ALXHBYQCSBE52J6O6RXS4IRUUQZ5MOMR4QPVJ2LQ",
+        contractId: "CABSVACQ7JK6CO7H64Y5V5H72UUIE2I472ASPSSMFIOYOOJKG2NHF3VU",
     }
 };
 const Errors = {
@@ -104,7 +104,7 @@ class Contract {
         this.options = options;
         this.spec = new soroban_client_1.ContractSpec([
             "AAAAAAAAAAAAAAAKaW5pdGlhbGl6ZQAAAAAAAgAAAAAAAAANdG9rZW5fYWRkcmVzcwAAAAAAABMAAAAAAAAAC2ZlZV9hZGRyZXNzAAAAABMAAAAA",
-            "AAAAAAAAAAAAAAALY29sb3JzX21pbmUAAAAAAwAAAAAAAAAFbWluZXIAAAAAAAATAAAAAAAAAAJ0bwAAAAAD6AAAABMAAAAAAAAABmNvbG9ycwAAAAAD7AAAAAQAAAAEAAAAAA==",
+            "AAAAAAAAAAAAAAALY29sb3JzX21pbmUAAAAABAAAAAAAAAAGc291cmNlAAAAAAATAAAAAAAAAAVtaW5lcgAAAAAAA+gAAAATAAAAAAAAAAJ0bwAAAAAD6AAAABMAAAAAAAAABmNvbG9ycwAAAAAD7AAAAAQAAAAEAAAAAA==",
             "AAAAAAAAAAAAAAAPY29sb3JzX3RyYW5zZmVyAAAAAAMAAAAAAAAABGZyb20AAAATAAAAAAAAAAJ0bwAAAAAAEwAAAAAAAAAGY29sb3JzAAAAAAPqAAAD7QAAAAMAAAATAAAABAAAAAQAAAAA",
             "AAAAAAAAAAAAAAANY29sb3JfYmFsYW5jZQAAAAAAAAMAAAAAAAAABW93bmVyAAAAAAAAEwAAAAAAAAAFbWluZXIAAAAAAAPoAAAAEwAAAAAAAAAFY29sb3IAAAAAAAAEAAAAAQAAAAQ=",
             "AAAAAAAAAAAAAAAKZ2x5cGhfbWludAAAAAAABAAAAAAAAAAGbWludGVyAAAAAAATAAAAAAAAAAJ0bwAAAAAD6AAAABMAAAAAAAAABmNvbG9ycwAAAAAD7AAAABMAAAPsAAAABAAAA+oAAAAEAAAAAAAAAAV3aWR0aAAAAAAAA+gAAAAEAAAAAQAAA+gAAAPuAAAAIA==",
@@ -132,10 +132,10 @@ class Contract {
             parseResultXdr: () => { },
         });
     };
-    colorsMine = async ({ miner, to, colors }, options = {}) => {
+    colorsMine = async ({ source, miner, to, colors }, options = {}) => {
         return await (0, invoke_js_1.invoke)({
             method: 'colors_mine',
-            args: this.spec.funcArgsToScVals("colors_mine", { miner: new soroban_client_1.Address(miner), to, colors }),
+            args: this.spec.funcArgsToScVals("colors_mine", { source: new soroban_client_1.Address(source), miner, to, colors }),
             ...options,
             ...this.options,
             parseResultXdr: () => { },

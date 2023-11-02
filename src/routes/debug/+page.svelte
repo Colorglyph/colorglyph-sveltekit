@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { generateRGBSpectrum } from '$lib/utils'
-	import { Contract } from 'colorglyph-sdk'
+	import { Contract, networks } from 'colorglyph-sdk'
 	import type { Ok, HashType, GlyphType, Offer } from 'colorglyph-sdk'
 	import { Keypair, Networks, Transaction } from 'soroban-client'
 
@@ -8,10 +8,9 @@
 	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2')
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y'
 	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
-	const CONTRACTID = 'CBZGCR4EQYDRNL6XQVWOGDKBYQSAKG2DWKJU6LUBE3UIGT6I6LYRX42A'
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'
 
-	let GLYPH: string = 'd58094fd3791508e4af6a2b2e278dea70c3fd6a0fa8db5ba47f07058cb7b87a3';
+	let GLYPH: string | undefined = 'd58094fd3791508e4af6a2b2e278dea70c3fd6a0fa8db5ba47f07058cb7b87a3';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
@@ -43,8 +42,7 @@
 	}
 
 	const ColorglyphSDK = new Contract({
-		contractId: CONTRACTID,
-		networkPassphrase: Networks.FUTURENET,
+		...networks.futurenet,
 		rpcUrl: 'https://rpc-futurenet.stellar.org', // 'http://localhost:8000/soroban/rpc',
 		wallet: new Wallet()
 	});
@@ -69,7 +67,8 @@
 			let map = Array.from(mineColors).slice(index * max_mine, index * max_mine + max_mine);
 			let res = await ColorglyphSDK.colorsMine(
 				{
-					miner: ME,
+					source: ME,
+					miner: undefined,
 					to: undefined,
 					colors: new Map(map)
 				},
@@ -130,7 +129,8 @@
 	async function colors_mine() {
 		let res = await ColorglyphSDK.colorsMine(
 			{
-				miner: ME,
+				source: ME,
+				miner: undefined,
 				to: undefined,
 				colors: new Map(new Array(2).fill(0).map((_, i) => [i, 1000]))
 			},
@@ -214,7 +214,7 @@
 		let glyph: any = (await ColorglyphSDK.glyphGet({
 			hash_type: {
 				tag: 'Glyph',
-				values: [Buffer.from(GLYPH, 'hex')]
+				values: [Buffer.from(GLYPH!, 'hex')]
 			} as HashType
 		})) as Ok<GlyphType>;
 
@@ -240,7 +240,7 @@
 	async function offer_post(address: string) {
 		const sell = {
 			tag: 'Glyph',
-			values: [Buffer.from(GLYPH, 'hex')]
+			values: [Buffer.from(GLYPH!, 'hex')]
 		} as Offer;
 		const buy = {
 			tag: 'Asset',
@@ -279,7 +279,7 @@
 
 				sell: {
 					tag: 'Glyph',
-					values: [Buffer.from(GLYPH, 'hex')]
+					values: [Buffer.from(GLYPH!, 'hex')]
 				} as Offer,
 				buy: undefined
 			},
@@ -297,7 +297,7 @@
 			{
 				sell: {
 					tag: 'Glyph',
-					values: [Buffer.from(GLYPH, 'hex')]
+					values: [Buffer.from(GLYPH!, 'hex')]
 				},
 				buy: {
 					tag: 'Asset',
@@ -322,7 +322,7 @@
 				to: undefined,
 				hash_type: {
 					tag: 'Glyph',
-					values: [Buffer.from(GLYPH, 'hex')]
+					values: [Buffer.from(GLYPH!, 'hex')]
 				} as HashType
 			},
 			{ 

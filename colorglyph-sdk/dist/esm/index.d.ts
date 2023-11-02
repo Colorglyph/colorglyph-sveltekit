@@ -44,7 +44,7 @@ export declare class Err<E extends Error_ = Error_> implements Result<any, E> {
 export declare const networks: {
     readonly futurenet: {
         readonly networkPassphrase: "Test SDF Future Network ; October 2022";
-        readonly contractId: "CCBL4VO5IRQHL6F2ALXHBYQCSBE52J6O6RXS4IRUUQZ5MOMR4QPVJ2LQ";
+        readonly contractId: "CABSVACQ7JK6CO7H64Y5V5H72UUIE2I472ASPSSMFIOYOOJKG2NHF3VU";
     };
 };
 export type StorageKey = {
@@ -142,8 +142,9 @@ export declare class Contract {
          */
         secondsToWait?: number | undefined;
     }) => Promise<R extends undefined ? void : R extends "simulated" ? SorobanClient.SorobanRpc.SimulateTransactionResponse : R extends "full" ? SorobanClient.SorobanRpc.SimulateTransactionResponse | SorobanClient.SorobanRpc.SendTransactionResponse | SorobanClient.SorobanRpc.GetTransactionResponse : void>;
-    colorsMine: <R extends "simulated" | "full" | undefined = undefined>({ miner, to, colors }: {
-        miner: string;
+    colorsMine: <R extends "simulated" | "full" | undefined = undefined>({ source, miner, to, colors }: {
+        source: string;
+        miner: Option<string>;
         to: Option<string>;
         colors: Map<u32, u32>;
     }, options?: {
