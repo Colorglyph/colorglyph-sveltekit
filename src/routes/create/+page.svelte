@@ -2,11 +2,11 @@
     import { countBy } from "lodash-es";
     import { onMount } from "svelte";
     import { writable, derived, type Writable } from "svelte/store";
-
-    import HexGlyph from "../../components/Hexglyph.svelte";
+    import HexGlyph from "@/components/Hexglyph.svelte";
     import { Keypair } from "soroban-client";
     import { fetcher } from 'itty-fetcher'
     import { PUBLIC_API_BASE } from '$env/static/public'
+    import lord from '@/lib/lord.json'
 
     const api = fetcher({base: PUBLIC_API_BASE})
 
@@ -80,6 +80,11 @@
                     return p;
                 });
         }
+    }
+
+    function dark() {
+        width.set(40)
+        palette.set(lord.map((hex: string) => `#${hex}`))
     }
 
     function erase() {
@@ -171,7 +176,7 @@
                 {/each}
             </ul>
 
-            <ul class="flex mt-2 sticky left-0 bottom-0">
+            <ul class="flex flex-wrap mt-2 sticky left-0 bottom-0">
                 {#each $colors as { hex, count } (hex)}
                     <li
                         class="flex flex-col items-center"
@@ -208,6 +213,10 @@
       </label> -->
 
     <div class="mt-2 flex">
+        <button
+            on:click={dark}
+            class="mr-2 bg-black text-white py-1 px-2 rounded">👀</button
+        >
         <button
             on:click={erase}
             class="mr-2 bg-black text-white py-1 px-2 rounded">Erase</button
