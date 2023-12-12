@@ -14,80 +14,26 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Contract = exports.networks = exports.Err = exports.Ok = exports.Address = void 0;
-const soroban_client_1 = require("soroban-client");
-Object.defineProperty(exports, "Address", { enumerable: true, get: function () { return soroban_client_1.Address; } });
+exports.Contract = exports.Errors = exports.networks = void 0;
+const stellar_sdk_1 = require("stellar-sdk");
 const buffer_1 = require("buffer");
-const invoke_js_1 = require("./invoke.js");
-__exportStar(require("./invoke.js"), exports);
+const assembled_tx_js_1 = require("./assembled-tx.js");
+__exportStar(require("./assembled-tx.js"), exports);
 __exportStar(require("./method-options.js"), exports);
-;
-;
-class Ok {
-    value;
-    constructor(value) {
-        this.value = value;
-    }
-    unwrapErr() {
-        throw new Error('No error');
-    }
-    unwrap() {
-        return this.value;
-    }
-    isOk() {
-        return true;
-    }
-    isErr() {
-        return !this.isOk();
-    }
-}
-exports.Ok = Ok;
-class Err {
-    error;
-    constructor(error) {
-        this.error = error;
-    }
-    unwrapErr() {
-        return this.error;
-    }
-    unwrap() {
-        throw new Error(this.error.message);
-    }
-    isOk() {
-        return false;
-    }
-    isErr() {
-        return !this.isOk();
-    }
-}
-exports.Err = Err;
 if (typeof window !== 'undefined') {
     //@ts-ignore Buffer exists
     window.Buffer = window.Buffer || buffer_1.Buffer;
 }
-const regex = /Error\(Contract, #(\d+)\)/;
-function parseError(message) {
-    const match = message.match(regex);
-    if (!match) {
-        return undefined;
-    }
-    if (Errors === undefined) {
-        return undefined;
-    }
-    let i = parseInt(match[1], 10);
-    let err = Errors[i];
-    if (err) {
-        return new Err(err);
-    }
-    return undefined;
-}
 exports.networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",
-        contractId: "CABSVACQ7JK6CO7H64Y5V5H72UUIE2I472ASPSSMFIOYOOJKG2NHF3VU",
+        contractId: "CADWGDZULUDFS5EHE35KTRZ6KNWP4FY7CQKGJY37WGRW73RVWQI3OEOA",
     }
 };
-const Errors = {
+/**
+    
+    */
+exports.Errors = {
     1: { message: "" },
     2: { message: "" },
     3: { message: "" },
@@ -102,7 +48,7 @@ class Contract {
     spec;
     constructor(options) {
         this.options = options;
-        this.spec = new soroban_client_1.ContractSpec([
+        this.spec = new stellar_sdk_1.ContractSpec([
             "AAAAAAAAAAAAAAAKaW5pdGlhbGl6ZQAAAAAAAgAAAAAAAAANdG9rZW5fYWRkcmVzcwAAAAAAABMAAAAAAAAAC2ZlZV9hZGRyZXNzAAAAABMAAAAA",
             "AAAAAAAAAAAAAAALY29sb3JzX21pbmUAAAAABAAAAAAAAAAGc291cmNlAAAAAAATAAAAAAAAAAVtaW5lcgAAAAAAA+gAAAATAAAAAAAAAAJ0bwAAAAAD6AAAABMAAAAAAAAABmNvbG9ycwAAAAAD7AAAAAQAAAAEAAAAAA==",
             "AAAAAAAAAAAAAAAPY29sb3JzX3RyYW5zZmVyAAAAAAMAAAAAAAAABGZyb20AAAATAAAAAAAAAAJ0bwAAAAAAEwAAAAAAAAAGY29sb3JzAAAAAAPqAAAD7QAAAAMAAAATAAAABAAAAAQAAAAA",
@@ -123,148 +69,198 @@ class Contract {
             "AAAAAgAAAAAAAAAAAAAABU9mZmVyAAAAAAAAAwAAAAEAAAAAAAAABUdseXBoAAAAAAAAAQAAA+4AAAAgAAAAAQAAAAAAAAAFQXNzZXQAAAAAAAACAAAAEwAAAAsAAAABAAAAAAAAAAlBc3NldFNlbGwAAAAAAAADAAAAEwAAABMAAAAL"
         ]);
     }
+    parsers = {
+        initialize: () => { },
+        colorsMine: () => { },
+        colorsTransfer: () => { },
+        colorBalance: (result) => this.spec.funcResToNative("color_balance", result),
+        glyphMint: (result) => this.spec.funcResToNative("glyph_mint", result),
+        glyphTransfer: () => { },
+        glyphScrape: () => { },
+        glyphGet: (result) => {
+            if (result instanceof assembled_tx_js_1.Err)
+                return result;
+            return new assembled_tx_js_1.Ok(this.spec.funcResToNative("glyph_get", result));
+        },
+        offerPost: (result) => {
+            if (result instanceof assembled_tx_js_1.Err)
+                return result;
+            return new assembled_tx_js_1.Ok(this.spec.funcResToNative("offer_post", result));
+        },
+        offerDelete: (result) => {
+            if (result instanceof assembled_tx_js_1.Err)
+                return result;
+            return new assembled_tx_js_1.Ok(this.spec.funcResToNative("offer_delete", result));
+        },
+        offersGet: (result) => {
+            if (result instanceof assembled_tx_js_1.Err)
+                return result;
+            return new assembled_tx_js_1.Ok(this.spec.funcResToNative("offers_get", result));
+        }
+    };
+    txFromJSON = (json) => {
+        const { method, ...tx } = JSON.parse(json);
+        return assembled_tx_js_1.AssembledTransaction.fromJSON({
+            ...this.options,
+            method,
+            parseResultXdr: this.parsers[method],
+        }, tx);
+    };
+    fromJSON = {
+        initialize: (this.txFromJSON),
+        colorsMine: (this.txFromJSON),
+        colorsTransfer: (this.txFromJSON),
+        colorBalance: (this.txFromJSON),
+        glyphMint: (this.txFromJSON),
+        glyphTransfer: (this.txFromJSON),
+        glyphScrape: (this.txFromJSON),
+        glyphGet: (this.txFromJSON),
+        offerPost: (this.txFromJSON),
+        offerDelete: (this.txFromJSON),
+        offersGet: (this.txFromJSON)
+    };
+    /**
+* Construct and simulate a initialize transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     initialize = async ({ token_address, fee_address }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'initialize',
-            args: this.spec.funcArgsToScVals("initialize", { token_address: new soroban_client_1.Address(token_address), fee_address: new soroban_client_1.Address(fee_address) }),
+            args: this.spec.funcArgsToScVals("initialize", { token_address: new stellar_sdk_1.Address(token_address), fee_address: new stellar_sdk_1.Address(fee_address) }),
             ...options,
             ...this.options,
-            parseResultXdr: () => { },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['initialize'],
         });
     };
+    /**
+* Construct and simulate a colors_mine transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     colorsMine = async ({ source, miner, to, colors }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'colors_mine',
-            args: this.spec.funcArgsToScVals("colors_mine", { source: new soroban_client_1.Address(source), miner, to, colors }),
+            args: this.spec.funcArgsToScVals("colors_mine", { source: new stellar_sdk_1.Address(source), miner, to, colors }),
             ...options,
             ...this.options,
-            parseResultXdr: () => { },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['colorsMine'],
         });
     };
+    /**
+* Construct and simulate a colors_transfer transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     colorsTransfer = async ({ from, to, colors }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'colors_transfer',
-            args: this.spec.funcArgsToScVals("colors_transfer", { from: new soroban_client_1.Address(from), to: new soroban_client_1.Address(to), colors }),
+            args: this.spec.funcArgsToScVals("colors_transfer", { from: new stellar_sdk_1.Address(from), to: new stellar_sdk_1.Address(to), colors }),
             ...options,
             ...this.options,
-            parseResultXdr: () => { },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['colorsTransfer'],
         });
     };
+    /**
+* Construct and simulate a color_balance transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     colorBalance = async ({ owner, miner, color }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'color_balance',
-            args: this.spec.funcArgsToScVals("color_balance", { owner: new soroban_client_1.Address(owner), miner, color }),
+            args: this.spec.funcArgsToScVals("color_balance", { owner: new stellar_sdk_1.Address(owner), miner, color }),
             ...options,
             ...this.options,
-            parseResultXdr: (xdr) => {
-                return this.spec.funcResToNative("color_balance", xdr);
-            },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['colorBalance'],
         });
     };
+    /**
+* Construct and simulate a glyph_mint transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     glyphMint = async ({ minter, to, colors, width }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'glyph_mint',
-            args: this.spec.funcArgsToScVals("glyph_mint", { minter: new soroban_client_1.Address(minter), to, colors, width }),
+            args: this.spec.funcArgsToScVals("glyph_mint", { minter: new stellar_sdk_1.Address(minter), to, colors, width }),
             ...options,
             ...this.options,
-            parseResultXdr: (xdr) => {
-                return this.spec.funcResToNative("glyph_mint", xdr);
-            },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['glyphMint'],
         });
     };
+    /**
+* Construct and simulate a glyph_transfer transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     glyphTransfer = async ({ to, hash_type }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'glyph_transfer',
-            args: this.spec.funcArgsToScVals("glyph_transfer", { to: new soroban_client_1.Address(to), hash_type }),
+            args: this.spec.funcArgsToScVals("glyph_transfer", { to: new stellar_sdk_1.Address(to), hash_type }),
             ...options,
             ...this.options,
-            parseResultXdr: () => { },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['glyphTransfer'],
         });
     };
+    /**
+* Construct and simulate a glyph_scrape transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     glyphScrape = async ({ to, hash_type }, options = {}) => {
-        return await (0, invoke_js_1.invoke)({
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
             method: 'glyph_scrape',
             args: this.spec.funcArgsToScVals("glyph_scrape", { to, hash_type }),
             ...options,
             ...this.options,
-            parseResultXdr: () => { },
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['glyphScrape'],
         });
     };
+    /**
+* Construct and simulate a glyph_get transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     glyphGet = async ({ hash_type }, options = {}) => {
-        try {
-            return await (0, invoke_js_1.invoke)({
-                method: 'glyph_get',
-                args: this.spec.funcArgsToScVals("glyph_get", { hash_type }),
-                ...options,
-                ...this.options,
-                parseResultXdr: (xdr) => {
-                    return new Ok(this.spec.funcResToNative("glyph_get", xdr));
-                },
-            });
-        }
-        catch (e) {
-            let err = parseError(e.toString());
-            if (err)
-                return err;
-            throw e;
-        }
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
+            method: 'glyph_get',
+            args: this.spec.funcArgsToScVals("glyph_get", { hash_type }),
+            ...options,
+            ...this.options,
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['glyphGet'],
+        });
     };
+    /**
+* Construct and simulate a offer_post transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     offerPost = async ({ sell, buy }, options = {}) => {
-        try {
-            return await (0, invoke_js_1.invoke)({
-                method: 'offer_post',
-                args: this.spec.funcArgsToScVals("offer_post", { sell, buy }),
-                ...options,
-                ...this.options,
-                parseResultXdr: (xdr) => {
-                    return new Ok(this.spec.funcResToNative("offer_post", xdr));
-                },
-            });
-        }
-        catch (e) {
-            let err = parseError(e.toString());
-            if (err)
-                return err;
-            throw e;
-        }
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
+            method: 'offer_post',
+            args: this.spec.funcArgsToScVals("offer_post", { sell, buy }),
+            ...options,
+            ...this.options,
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['offerPost'],
+        });
     };
+    /**
+* Construct and simulate a offer_delete transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     offerDelete = async ({ sell, buy }, options = {}) => {
-        try {
-            return await (0, invoke_js_1.invoke)({
-                method: 'offer_delete',
-                args: this.spec.funcArgsToScVals("offer_delete", { sell, buy }),
-                ...options,
-                ...this.options,
-                parseResultXdr: (xdr) => {
-                    return new Ok(this.spec.funcResToNative("offer_delete", xdr));
-                },
-            });
-        }
-        catch (e) {
-            let err = parseError(e.toString());
-            if (err)
-                return err;
-            throw e;
-        }
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
+            method: 'offer_delete',
+            args: this.spec.funcArgsToScVals("offer_delete", { sell, buy }),
+            ...options,
+            ...this.options,
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['offerDelete'],
+        });
     };
+    /**
+* Construct and simulate a offers_get transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+*/
     offersGet = async ({ sell, buy }, options = {}) => {
-        try {
-            return await (0, invoke_js_1.invoke)({
-                method: 'offers_get',
-                args: this.spec.funcArgsToScVals("offers_get", { sell, buy }),
-                ...options,
-                ...this.options,
-                parseResultXdr: (xdr) => {
-                    return new Ok(this.spec.funcResToNative("offers_get", xdr));
-                },
-            });
-        }
-        catch (e) {
-            let err = parseError(e.toString());
-            if (err)
-                return err;
-            throw e;
-        }
+        return await assembled_tx_js_1.AssembledTransaction.fromSimulation({
+            method: 'offers_get',
+            args: this.spec.funcArgsToScVals("offers_get", { sell, buy }),
+            ...options,
+            ...this.options,
+            errorTypes: exports.Errors,
+            parseResultXdr: this.parsers['offersGet'],
+        });
     };
 }
 exports.Contract = Contract;

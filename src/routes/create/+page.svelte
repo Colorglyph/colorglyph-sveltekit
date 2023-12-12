@@ -83,8 +83,8 @@
     }
 
     function dark() {
-        width.set(40)
-        palette.set(lord.map((hex: string) => `#${hex}`))
+        width.set(16)
+        palette.set(lord.map((hex: number) => `#${hex.toString(16).padStart(6, '0')}`))
     }
 
     function erase() {

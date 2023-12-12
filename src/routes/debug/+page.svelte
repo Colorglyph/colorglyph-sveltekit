@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { generateRGBSpectrum } from '$lib/utils'
 	import { Contract, networks } from 'colorglyph-sdk'
-	import type { Ok, HashType, GlyphType, Offer } from 'colorglyph-sdk'
+	import type { HashType, Offer, Glyph } from 'colorglyph-sdk'
 	import { Keypair, Networks, Transaction } from 'soroban-client'
 
 	const ME = 'GBGP5SD75TDB2ZL7JDJEFPSWDBEQRDJ4757ZXL57TOOQJSMWROT5JYKD'
@@ -10,12 +10,12 @@
 	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'
 
-	let GLYPH: string | undefined = 'd58094fd3791508e4af6a2b2e278dea70c3fd6a0fa8db5ba47f07058cb7b87a3';
+	let GLYPH: string | undefined = '1fa392ddd2d18725e8dbc98b8948ae8922577125ffd942cfe3ee77b6c714ffe2';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
 
-	let width: number = 4 // (40 max)
+	let width: number = 16 // (40 max)
 	let palette: number[] = []
 
 	// palette = generateRGBSpectrum(width)
@@ -39,6 +39,9 @@
 
 			return transaction.toXDR();
 		}
+		async signAuthEntry(_xdr: string) {
+			return ''
+		}
 	}
 
 	const ColorglyphSDK = new Contract({
@@ -49,11 +52,11 @@
 
 	async function super_mint() {
 		// because write count is limited to 20
-		// let max_mine = 18;
-		// let max_mint = 19;
+		let max_mine = 18;
+		let max_mint = 19;
 		// because events are limited to 2 KB
-		let max_mine = 10
-		let max_mint = 10
+		// let max_mine = 10
+		// let max_mint = 10
 
 		let mintIndexes = new Map<number, number[]>();
 		let mineColors = new Map(generateRGBSpectrum(width).map((color, index) => {
@@ -65,7 +68,7 @@
 
 		for (let index = 0; index < Math.ceil(width ** 2 / max_mine); index++) {
 			let map = Array.from(mineColors).slice(index * max_mine, index * max_mine + max_mine);
-			let res = await ColorglyphSDK.colorsMine(
+			let tx = await ColorglyphSDK.colorsMine(
 				{
 					source: ME,
 					miner: undefined,
@@ -73,10 +76,12 @@
 					colors: new Map(map)
 				},
 				{
-					responseType: 'full',
+					// responseType: 'full',
 					fee: 10_000_000
 				}
 			);
+
+			let { result: res } = await tx.signAndSend()
 
 			console.log(index, 'mine', res);
 		}
@@ -86,7 +91,7 @@
 			let map = Array.from(mintIndexes).slice(index * max_mint, index * max_mint + max_mint);
 			mintMap.set(ME, new Map(map));
 
-			let res: any = await ColorglyphSDK.glyphMint(
+			let tx = await ColorglyphSDK.glyphMint(
 				{
 					minter: ME,
 					to: undefined,
@@ -94,15 +99,17 @@
 					width: undefined
 				},
 				{
-					responseType: 'full',
+					// responseType: 'full',
 					fee: 10_000_000
 				}
 			);
 
+			let { result: res } = await tx.signAndSend()
+
 			console.log(index, 'mint', res);
 		}
 
-		let res: any = await ColorglyphSDK.glyphMint(
+		let tx = await ColorglyphSDK.glyphMint(
 			{
 				minter: ME,
 				to: undefined,
@@ -111,14 +118,16 @@
 			},
 			{
 				// responseType: 'simulated',
-				responseType: 'full',
+				// responseType: 'full',
 				fee: 10_000_000,
 			}
 		);
 
+		let { result: res } = await tx.signAndSend()
+
 		console.log('mint', res);
 
-		const hash = res.resultMetaXdr.value().sorobanMeta().returnValue().value()?.toString('hex');
+		const hash = res?.toString('hex');
 
 		GLYPH = hash
 		console.log(hash);
@@ -127,7 +136,7 @@
 	}
 
 	async function colors_mine() {
-		let res = await ColorglyphSDK.colorsMine(
+		let tx = await ColorglyphSDK.colorsMine(
 			{
 				source: ME,
 				miner: undefined,
@@ -138,13 +147,15 @@
 				// responseType: 'full', 
 				fee: 1_000_000 
 			}
-		);
+		)
+
+		let { result: res } = await tx.signAndSend()
 
 		console.log(res);
 	}
 
 	async function colors_transfer() {
-		let res = await ColorglyphSDK.colorsTransfer(
+		let tx = await ColorglyphSDK.colorsTransfer(
 			{
 				from: ME,
 				to: THEM,
@@ -159,12 +170,14 @@
 			}
 		);
 
+		let { result: res } = await tx.signAndSend()
+
 		console.log(res);
 	}
 
 	// TODO switch to use getLedgerEntry
 	async function color_balance() {
-		let res = await ColorglyphSDK.colorBalance({
+		let { result: res } = await ColorglyphSDK.colorBalance({
 			owner: ME,
 			miner: undefined,
 			color: 0
@@ -181,7 +194,7 @@
 		let colors: Map<string, Map<number, number[]>> = new Map();
 		colors.set(ME, indexes);
 
-		let res = await ColorglyphSDK.glyphMint(
+		let tx = await ColorglyphSDK.glyphMint(
 			{
 				minter: ME,
 				to: undefined,
@@ -193,6 +206,8 @@
 				fee: 1_000_000
 			}
 		);
+
+		let { result: res } = await tx.signAndSend()
 
 		console.log(res);
 
@@ -211,18 +226,18 @@
 
 	// TODO switch to use getLedgerEntry
 	async function glyph_get(key = ME) {
-		let glyph: any = (await ColorglyphSDK.glyphGet({
+		let { result: res } = (await ColorglyphSDK.glyphGet({
 			hash_type: {
 				tag: 'Glyph',
 				values: [Buffer.from(GLYPH!, 'hex')]
-			} as HashType
-		})) as Ok<GlyphType>;
+			}
+		}))
 
-		console.log(glyph)
+		console.log(res)
 
-		glyph = glyph.value.values[0];
+		const glyph = res.unwrap().values[0] as Glyph
 
-		width = glyph.width;
+		width = glyph.width
 
 		palette = new Array(glyph.length).fill(256 ** 3 - 1);
 
@@ -247,7 +262,7 @@
 			values: [XLM, BigInt(100)]
 		} as Offer;
 
-		let res = await ColorglyphSDK.offerPost(
+		let tx = await ColorglyphSDK.offerPost(
 			{
 				sell: address === ME ? sell : {
 					tag: 'AssetSell',
@@ -255,18 +270,20 @@
 				} as Offer,
 				buy: address === ME ? buy : sell
 			},
-			{ 
+			{
 				// responseType: 'full', 
 				fee: 1_000_000 
 			}
 		);
+
+		let { result: res } = await tx.signAndSend()
 
 		console.log(res);
 	}
 
 	// TODO switch to use getLedgerEntry
 	async function offers_get() {
-		let res = await ColorglyphSDK.offersGet(
+		let { result: res } = await ColorglyphSDK.offersGet(
 			{
 				// sell: {
 				// 	tag: 'AssetSell',
@@ -274,7 +291,7 @@
 				// } as Offer,
 				// buy: {
 				// 	tag: 'Glyph',
-				// 	values: [Buffer.from(GLYPH, 'hex')]
+				// 	values: [Buffer.from(GLYPH!, 'hex')]
 				// } as Offer
 
 				sell: {
@@ -293,7 +310,7 @@
 	}
 
 	async function offer_delete() {
-		let res = await ColorglyphSDK.offerDelete(
+		let tx = await ColorglyphSDK.offerDelete(
 			{
 				sell: {
 					tag: 'Glyph',
@@ -310,6 +327,8 @@
 			}
 		);
 
+		let { result: res } = await tx.signAndSend()
+
 		console.log(res);
 	}
 
@@ -317,7 +336,7 @@
 		// AAAAAAAHFd7/////AAAAAQAAAAAAAAAY/////gAAAAA=
 		// invokeHostFunctionTrapped
 	async function glyph_scrape() {
-		let res = await ColorglyphSDK.glyphScrape(
+		let tx = await ColorglyphSDK.glyphScrape(
 			{
 				to: undefined,
 				hash_type: {
@@ -330,6 +349,8 @@
 				fee: 1_000_000 
 			}
 		);
+
+		let { result: res } = await tx.signAndSend()
 
 		console.log(res);
 	}
