@@ -38,6 +38,7 @@
         const kp = Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
         await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
+        // await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
 
         await api.post('/mint', {
             palette,
@@ -62,7 +63,7 @@
 
 <div class="flex flex-col max-w-xs [&>*]:mb-1">
     <label>
-        <input type="range" min="1" max="40" bind:value={width}>
+        <input type="range" min="1" max="43" bind:value={width}>
         {width}
     </label>
     <label>
