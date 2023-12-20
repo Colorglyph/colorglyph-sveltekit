@@ -5,7 +5,7 @@
 	import { generateRandomSpectrum } from "$lib/utils"
     import { fetcher } from 'itty-fetcher'
     import { PUBLIC_API_BASE } from '$env/static/public'
-    import { Keypair } from 'soroban-client'
+    import { Keypair } from 'stellar-sdk'
 
     const api = fetcher({base: PUBLIC_API_BASE})
 

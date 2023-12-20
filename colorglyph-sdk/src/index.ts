@@ -26,7 +26,6 @@ if (typeof window !== 'undefined') {
     window.Buffer = window.Buffer || Buffer;
 }
 
-
 export const networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",

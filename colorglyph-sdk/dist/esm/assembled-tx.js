@@ -200,12 +200,12 @@ export class AssembledTransaction {
         return await SentTransaction.init(this.options, this, secondsToWait);
     };
     getStorageExpiration = async () => {
-        const key = new Contract(this.options.contractId).getFootprint()[1];
-        const expirationKey = xdr.LedgerKey.expiration(new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR()) }));
-        const entryRes = await this.server.getLedgerEntries(expirationKey);
-        if (!(entryRes.entries && entryRes.entries.length))
+        const entryRes = await this.server.getLedgerEntries(new Contract(this.options.contractId).getFootprint());
+        if (!entryRes.entries ||
+            !entryRes.entries.length ||
+            !entryRes.entries[0].liveUntilLedgerSeq)
             throw new Error('failed to get ledger entry');
-        return entryRes.entries[0].val.expiration().expirationLedgerSeq();
+        return entryRes.entries[0].liveUntilLedgerSeq;
     };
     /**
      * Get a list of accounts, other than the invoker of the simulation, that
@@ -274,18 +274,17 @@ export class AssembledTransaction {
      * contract's current `persistent` storage expiration date/ledger
      * number/block.
      */
-    expiration = this.getStorageExpiration()) => {
+    wallet = this.getWallet(), expiration = this.getStorageExpiration()) => {
         if (!this.raw)
             throw new Error('Transaction has not yet been assembled or simulated');
         const needsNonInvokerSigningBy = await this.needsNonInvokerSigningBy();
         if (!needsNonInvokerSigningBy)
             throw new NoUnsignedNonInvokerAuthEntriesError('No unsigned non-invoker auth entries; maybe you already signed?');
-        const publicKey = await this.getPublicKey();
+        const publicKey = (await (await wallet).getUserInfo()).publicKey;
         if (!publicKey)
             throw new Error('Could not get public key from wallet; maybe Freighter is not signed in?');
         if (needsNonInvokerSigningBy.indexOf(publicKey) === -1)
             throw new Error(`No auth entries for public key "${publicKey}"`);
-        const wallet = await this.getWallet();
         const rawInvokeHostFunctionOp = this.raw
             .operations[0];
         const authEntries = rawInvokeHostFunctionOp.auth ?? [];
@@ -302,7 +301,7 @@ export class AssembledTransaction {
             // (or maybe already was!)
             if (pk !== publicKey)
                 continue;
-            authEntries[i] = await authorizeEntry(entry, async (preimage) => Buffer.from(await wallet.signAuthEntry(preimage.toXDR('base64')), 'base64'), await expiration, this.options.networkPassphrase);
+            authEntries[i] = await authorizeEntry(entry, async (preimage) => Buffer.from(await (await wallet).signAuthEntry(preimage.toXDR('base64')), 'base64'), await expiration, this.options.networkPassphrase);
         }
     };
     get isReadCall() {

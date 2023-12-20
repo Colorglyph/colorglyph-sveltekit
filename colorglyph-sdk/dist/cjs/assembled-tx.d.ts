@@ -150,7 +150,7 @@ export declare class AssembledTransaction<T> {
      * Sending to all `needsNonInvokerSigningBy` owners in parallel is not currently
      * supported!
      */
-    signAuthEntries: (expiration?: number | Promise<number>) => Promise<void>;
+    signAuthEntries: (wallet?: Wallet | Promise<Wallet>, expiration?: number | Promise<number>) => Promise<void>;
     get isReadCall(): boolean;
     hasRealInvoker: () => Promise<boolean>;
 }
