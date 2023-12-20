@@ -1,5 +1,4 @@
-/// <reference types="node" />
-import { ContractSpec } from 'stellar-sdk';
+import { ContractSpec } from '@stellar/stellar-sdk';
 import { Buffer } from "buffer";
 import { AssembledTransaction, Ok, Err } from './assembled-tx.js';
 import type { u32, i128, Option, Error_ } from './assembled-tx.js';
