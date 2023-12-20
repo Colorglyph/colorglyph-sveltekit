@@ -10,7 +10,10 @@
         name: string
         metadata: {
             id: string,
-            status: string
+            fee: string,
+            status: string,
+            width: number,
+            length: number,
         }
     }
 
@@ -24,6 +27,10 @@
         await api.get('/glyphs')
         .then((res: any) => {
             console.log(res)
+            res.forEach((glyph: Glyph) => {
+                if (glyph.metadata.length)
+                    console.log(glyph.metadata.width, glyph.metadata.length, glyph.metadata.fee)
+            })
             glyphs = res
         })
     }
