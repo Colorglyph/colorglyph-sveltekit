@@ -63,7 +63,7 @@
 
 <div class="flex flex-col max-w-xs [&>*]:mb-1">
     <label>
-        <input type="range" min="1" max="43" bind:value={width}>
+        <input type="range" min="1" max="50" bind:value={width}>
         {width}
     </label>
     <label>

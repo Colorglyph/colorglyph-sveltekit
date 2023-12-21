@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { generateRGBSpectrum } from '$lib/utils'
-	import { Contract, networks } from 'colorglyph-sdk'
+	import { Contract } from 'colorglyph-sdk'
 	import type { HashType, Offer, Glyph } from 'colorglyph-sdk'
 	import { Keypair, Networks, Transaction } from 'stellar-sdk'
 
@@ -9,7 +9,7 @@
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y'
 	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'
-	const CONTRACT_ID = 'CDMGYHGOOT6B47C4UG2RY5C2H34FXA4H6B7I43BSCDS3A7I2FUOFQ563'
+	const CONTRACT_ID = 'CDYEDLOJDY3GTB6UHYAFYKYXNM2F7U5GGFL7P5E3IVRXQB67UZ57AD7L'
 
 	let GLYPH: string | undefined = '8ba3bed0bc43fc82f73dcb4ae3973ef12a8b179ae572e500b846697dc796a6c6';
 

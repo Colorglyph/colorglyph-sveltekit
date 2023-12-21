@@ -103,6 +103,7 @@
         const kp = Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
         await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
+        // await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
 
         await api.post('/mint', {
             palette: $palette.map((hex) => parseInt(hex.replace("#", ""), 16)),
