@@ -51,6 +51,6 @@
     "typescript": "^5.3.3",
     "util": "^0.12.5",
     "vite": "^4.5.1",
-    "stellar-sdk": "github:tyvdh/js-stellar-sdk#make-eventsource-optional"
+    "stellar-sdk": "git://github.com/tyvdh/js-stellar-sdk.git#5041177146c22dd17dda21fa8d2947f854c29d01"
   }
 }
