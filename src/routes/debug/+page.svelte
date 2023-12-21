@@ -2,7 +2,7 @@
 	import { generateRGBSpectrum } from '$lib/utils'
 	import { Contract, networks } from 'colorglyph-sdk'
 	import type { HashType, Offer, Glyph } from 'colorglyph-sdk'
-	import { Keypair, Networks, Transaction } from '@stellar/stellar-sdk'
+	import { Keypair, Networks, Transaction } from 'stellar-sdk'
 
 	const ME = 'GBGP5SD75TDB2ZL7JDJEFPSWDBEQRDJ4757ZXL57TOOQJSMWROT5JYKD'
 	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2')

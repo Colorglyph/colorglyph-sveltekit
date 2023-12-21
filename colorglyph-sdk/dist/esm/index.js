@@ -1,4 +1,4 @@
-import { ContractSpec, Address } from '@stellar/stellar-sdk';
+import { ContractSpec, Address } from 'stellar-sdk';
 import { Buffer } from "buffer";
 import { AssembledTransaction, Ok, Err } from './assembled-tx.js';
 export * from './assembled-tx.js';
@@ -10,7 +10,7 @@ if (typeof window !== 'undefined') {
 export const networks = {
     futurenet: {
         networkPassphrase: "Test SDF Future Network ; October 2022",
-        contractId: "CADWGDZULUDFS5EHE35KTRZ6KNWP4FY7CQKGJY37WGRW73RVWQI3OEOA",
+        contractId: "CDMGYHGOOT6B47C4UG2RY5C2H34FXA4H6B7I43BSCDS3A7I2FUOFQ563",
     }
 };
 /**

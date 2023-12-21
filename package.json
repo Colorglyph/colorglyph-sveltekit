@@ -8,13 +8,11 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "packageManager": "yarn@1.22.19",
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@rollup/plugin-inject": "^5.0.5",
     "@stellar/freighter-api": "^1.7.1",
-    "@stellar/stellar-sdk": "github:tyvdh/js-stellar-sdk#make-eventsource-optional",
     "@sveltejs/adapter-auto": "^2.1.1",
     "@sveltejs/adapter-cloudflare": "^2.3.4",
     "@sveltejs/adapter-static": "^2.0.3",
@@ -52,6 +50,7 @@
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
     "util": "^0.12.5",
-    "vite": "^4.5.1"
+    "vite": "^4.5.1",
+    "stellar-sdk": "github:tyvdh/js-stellar-sdk#make-eventsource-optional"
   }
 }

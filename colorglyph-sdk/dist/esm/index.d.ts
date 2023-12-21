@@ -1,4 +1,5 @@
-import { ContractSpec } from '@stellar/stellar-sdk';
+/// <reference types="node" />
+import { ContractSpec } from 'stellar-sdk';
 import { Buffer } from "buffer";
 import { AssembledTransaction, Ok, Err } from './assembled-tx.js';
 import type { u32, i128, Option, Error_ } from './assembled-tx.js';
@@ -8,7 +9,7 @@ export * from './method-options.js';
 export declare const networks: {
     readonly futurenet: {
         readonly networkPassphrase: "Test SDF Future Network ; October 2022";
-        readonly contractId: "CADWGDZULUDFS5EHE35KTRZ6KNWP4FY7CQKGJY37WGRW73RVWQI3OEOA";
+        readonly contractId: "CDMGYHGOOT6B47C4UG2RY5C2H34FXA4H6B7I43BSCDS3A7I2FUOFQ563";
     };
 };
 /**

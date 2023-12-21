@@ -13,21 +13,21 @@ export default defineConfig({
 	plugins: [
 		sveltekit()
 	],
-	server: {
-		fs: {
-			allow: ["./colorglyph-sdk"]
-		}
-	},
+	// server: {
+	// 	fs: {
+	// 		allow: ["./colorglyph-sdk"]
+	// 	}
+	// },
 	optimizeDeps: {
 		esbuildOptions: {
 			define: {
-				global: 'globalThis'
+				// global: 'globalThis'
 			},
 			plugins: [
-				NodeGlobalsPolyfillPlugin({
-					process: true,
-					buffer: true
-				})
+				// NodeGlobalsPolyfillPlugin({
+				// 	process: true,
+				// 	buffer: true,
+				// })
 			]
 		}
 	},
@@ -36,9 +36,9 @@ export default defineConfig({
 		sourcemap: true,
 		rollupOptions: {
 			plugins: [
-				inject({
-					window: path.resolve('src/lib/window.ts'),
-				}),
+				// inject({
+				// 	window: path.resolve('src/lib/window.ts'),
+				// }),
 			]
 		}
 	}

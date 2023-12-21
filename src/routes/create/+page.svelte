@@ -3,7 +3,7 @@
     import { onMount } from "svelte";
     import { writable, derived, type Writable } from "svelte/store";
     import HexGlyph from "@/components/Hexglyph.svelte";
-    import { Keypair } from "@stellar/stellar-sdk";
+    import { Keypair } from "stellar-sdk";
     import { fetcher } from 'itty-fetcher'
     import { PUBLIC_API_BASE } from '$env/static/public'
     import lord from '@/lib/lord.json'
