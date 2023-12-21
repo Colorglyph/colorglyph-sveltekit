@@ -51,12 +51,11 @@
 	});
 
 	async function super_mint() {
+		let secondsToWait = 30
+
 		// because write count is limited to 20
 		let max_mine = 18;
 		let max_mint = 19;
-		// because events are limited to 2 KB
-		// let max_mine = 10
-		// let max_mint = 10
 
 		let mintIndexes = new Map<number, number[]>();
 		let mineColors = new Map(generateRGBSpectrum(width).map((color, index) => {
@@ -81,7 +80,7 @@
 				}
 			);
 
-			let { result: res } = await tx.signAndSend()
+			let { result: res } = await tx.signAndSend({ secondsToWait })
 
 			console.log(index, 'mine', res);
 		}
@@ -104,7 +103,7 @@
 				}
 			);
 
-			let { result: res } = await tx.signAndSend()
+			let { result: res } = await tx.signAndSend({ secondsToWait })
 
 			console.log(index, 'mint', res);
 		}
@@ -123,7 +122,7 @@
 			}
 		);
 
-		let { result: res } = await tx.signAndSend()
+		let { result: res } = await tx.signAndSend({ secondsToWait })
 
 		console.log('mint', res);
 
