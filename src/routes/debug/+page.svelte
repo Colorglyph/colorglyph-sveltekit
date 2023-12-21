@@ -9,8 +9,9 @@
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y'
 	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'
+	const CONTRACT_ID = 'CDMGYHGOOT6B47C4UG2RY5C2H34FXA4H6B7I43BSCDS3A7I2FUOFQ563'
 
-	let GLYPH: string | undefined = '1fa392ddd2d18725e8dbc98b8948ae8922577125ffd942cfe3ee77b6c714ffe2';
+	let GLYPH: string | undefined = '8ba3bed0bc43fc82f73dcb4ae3973ef12a8b179ae572e500b846697dc796a6c6';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
@@ -45,8 +46,10 @@
 	}
 
 	const ColorglyphSDK = new Contract({
-		...networks.futurenet,
-		rpcUrl: 'https://rpc-futurenet.stellar.org', // 'http://localhost:8000/soroban/rpc',
+		contractId: CONTRACT_ID,
+		networkPassphrase: Networks.FUTURENET,
+		rpcUrl: 'https://rpc-futurenet.stellar.org',
+		// rpcUrl: 'http://localhost:8000/soroban/rpc',
 		wallet: new Wallet()
 	});
 
@@ -225,22 +228,20 @@
 
 	// TODO switch to use getLedgerEntry
 	async function glyph_get(key = ME) {
-		let { result: res } = (await ColorglyphSDK.glyphGet({
+		let { result: res } = await ColorglyphSDK.glyphGet({
 			hash_type: {
 				tag: 'Glyph',
 				values: [Buffer.from(GLYPH!, 'hex')]
 			}
-		}))
+		})
 
-		console.log(res)
-
-		const glyph = res.unwrap().values[0] as Glyph
+		const glyph = res.unwrap().values[0] as Glyph;
 
 		width = glyph.width
 
 		palette = new Array(glyph.length).fill(256 ** 3 - 1);
-
-		for (const [_account, colors] of glyph.colors.entries()) {
+		
+		for (const [_account, colors] of glyph.colors.values()) {
 			for (const [color, indexes] of colors) {
 				for (const index of indexes as number[]) {
 					palette.splice(index, 1, Number(color))	
