@@ -51,6 +51,13 @@
     "typescript": "^5.3.3",
     "util": "^0.12.5",
     "vite": "^4.5.1",
-    "stellar-sdk": "git://github.com/tyvdh/js-stellar-sdk.git#5041177146c22dd17dda21fa8d2947f854c29d01"
+    "stellar-sdk": "git+https://github.com/stellar/js-stellar-sdk.git#06699dd",
+    "@vespaiach/axios-fetch-adapter": "^0.3.1",
+    "axios": "^0.26.1"
+  },
+  "overrides": {
+    "stellar-sdk": {
+      "axios": "$axios"
+    }
   }
 }

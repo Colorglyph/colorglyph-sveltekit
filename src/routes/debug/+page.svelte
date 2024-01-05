@@ -11,7 +11,7 @@
 	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'
 	const CONTRACT_ID = 'CDYEDLOJDY3GTB6UHYAFYKYXNM2F7U5GGFL7P5E3IVRXQB67UZ57AD7L'
 
-	let GLYPH: string | undefined = '8ba3bed0bc43fc82f73dcb4ae3973ef12a8b179ae572e500b846697dc796a6c6';
+	let GLYPH: string | undefined = '252ea0ad98ca90c11f8a281c6e9c56ea4e7f9ccb15fcfe1dbb6b2ef446ccaf79';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
