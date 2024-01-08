@@ -51,7 +51,7 @@
     "lodash-es": "^4.17.21",
     "stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit",
     "svelte": "^4.2.8",
-    "stellar-sdk": "github:stellar/js-stellar-sdk#06699dd",
+    "stellar-sdk": "github:tyvdh/js-stellar-sdk#38479292",
     "@vespaiach/axios-fetch-adapter": "^0.3.1",
     "axios": "^0.26.1"
   },
