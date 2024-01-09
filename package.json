@@ -51,7 +51,7 @@
     "typescript": "^5.3.3",
     "util": "^0.12.5",
     "vite": "^4.5.1",
-    "@stellar/stellar-sdk": "https://github.com/stellar/js-stellar-sdk.git#06699dd"
+    "@stellar/stellar-sdk": "https://github.com/stellar/js-stellar-sdk#06699dd"
   },
   "overrides": {
     "@stellar/stellar-sdk": {
