@@ -23,7 +23,6 @@
     "@typescript-eslint/parser": "^6.15.0",
     "@vespaiach/axios-fetch-adapter": "^0.3.1",
     "autoprefixer": "^10.4.16",
-    "axios": "^0.26.1",
     "buffer": "^6.0.3",
     "buffer-es6": "^4.9.3",
     "bun-types": "^1.0.18",
@@ -54,8 +53,6 @@
     "@stellar/stellar-sdk": "https://github.com/stellar/js-stellar-sdk#06699dd"
   },
   "overrides": {
-    "@stellar/stellar-sdk": {
-      "axios": "$axios"
-    }
+    "axios": "^0.26.1"
   }
 }
