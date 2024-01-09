@@ -23,7 +23,7 @@
     "colorglyph-sdk": "file:./colorglyph-sdk",
     "itty-fetcher": "^0.9.4",
     "lodash-es": "^4.17.21",
-    "stellar-sdk": "https://github.com/tyvdh/js-stellar-sdk#c9daa9bad6487ab9505f943065e1a01568b1ec90"
+    "stellar-sdk": "@tinyanvil/stellar-sdk@11.1.0"
   },
   "overrides": {
     "stellar-sdk": {
