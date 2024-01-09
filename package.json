@@ -33,7 +33,7 @@
     "prettier-plugin-svelte": "^3.1.2",
     "prettier-plugin-tailwindcss": "^0.5.9",
     "rollup-plugin-node-polyfills": "^0.2.1",
-    "stellar-wallets-kit": "https://github.com/Creit-Tech/Stellar-Wallets-Kit#v0.1.4",
+    "stellar-wallets-kit": "github:Creit-Tech/Stellar-Wallets-Kit#v0.1.4",
     "svelte": "^4.2.8",
     "svelte-check": "^3.6.2",
     "tailwindcss": "^3.4.0",
@@ -42,19 +42,18 @@
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
     "util": "^0.12.5",
-    "vite": "^4.5.1"
-  },
-  "overrides": {
+    "vite": "^4.5.1",
+    "stellar-sdk": "github:tyvdh/js-stellar-sdk#c9daa9bad6487ab9505f943065e1a01568b1ec90",
     "axios": "^0.26.1"
   },
-  "private": true,
+  "overrides": {
+    "stellar-sdk": {
+      "axios": "$axios"
+    }
+  },
   "scripts": {
     "start": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" vite dev --host",
     "build": "vite build",
     "preview": "vite preview"
-  },
-  "type": "module",
-  "dependencies": {
-    "@stellar/stellar-sdk": "github:stellar/js-stellar-sdk#06699dde835feb2d113a674c8ec6e38fab68a9cc"
   }
 }

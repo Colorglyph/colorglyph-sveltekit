@@ -3,12 +3,15 @@
   "name": "colorglyph-sdk",
   "dependencies": {
     "@stellar/freighter-api": "1.7.1",
-    "@stellar/stellar-sdk": "github:stellar/js-stellar-sdk#06699dde835feb2d113a674c8ec6e38fab68a9cc",
+    "stellar-sdk": "github:tyvdh/js-stellar-sdk#c9daa9bad6487ab9505f943065e1a01568b1ec90",
     "@vespaiach/axios-fetch-adapter": "^0.3.1",
+    "axios": "^0.26.1",
     "buffer": "6.0.3"
   },
   "overrides": {
-    "axios": "^0.26.1"
+    "stellar-sdk": {
+      "axios": "$axios"
+    }
   },
   "scripts": {
     "build": "node ./scripts/build.mjs"
