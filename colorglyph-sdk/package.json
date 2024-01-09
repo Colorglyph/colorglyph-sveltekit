@@ -4,12 +4,12 @@
     "dependencies": {
         "@stellar/freighter-api": "1.7.1",
         "buffer": "6.0.3",
-        "stellar-sdk": "github:tyvdh/js-stellar-sdk#38479292c6acfeef898c37b6cedb41e323fdbad7",
+        "@stellar/stellar-sdk": "github:tyvdh/js-stellar-sdk#38479292c6acfeef898c37b6cedb41e323fdbad7",
         "@vespaiach/axios-fetch-adapter": "^0.3.1",
         "axios": "^0.26.1"
     },
     "overrides": {
-        "stellar-sdk": {
+        "@stellar/stellar-sdk": {
             "axios": "$axios"
         }
     },
