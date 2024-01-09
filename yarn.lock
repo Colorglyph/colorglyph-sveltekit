@@ -748,6 +748,17 @@
     toml "^3.0.0"
     urijs "^1.19.1"
 
+"@stellar/stellar-sdk@https://github.com/stellar/js-stellar-sdk#06699dd":
+  version "11.1.0"
+  resolved "https://github.com/stellar/js-stellar-sdk#06699dde835feb2d113a674c8ec6e38fab68a9cc"
+  dependencies:
+    "@stellar/stellar-base" "10.0.1"
+    axios "^1.6.0"
+    bignumber.js "^9.1.2"
+    randombytes "^2.1.0"
+    toml "^3.0.0"
+    urijs "^1.19.1"
+
 "@sveltejs/adapter-auto@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@sveltejs/adapter-auto/-/adapter-auto-2.1.1.tgz#e055c71bdb8d2923d63db089752675f70ab1a0f3"
@@ -3772,6 +3783,7 @@ strict-uri-encode@^2.0.0:
   integrity sha512-QwiXZgpRcKkhTj2Scnn++4PKtWsH0kpzZ62L2R6c/LUVYv7hVnZqcg2+sMuT6R7Jusu1vviK/MFsu6kNJfWlEQ==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
+  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
