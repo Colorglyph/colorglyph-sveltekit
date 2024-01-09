@@ -3743,6 +3743,17 @@ std-env@^3.7.0:
     toml "^3.0.0"
     urijs "^1.19.1"
 
+"stellar-sdk@https://github.com/tyvdh/js-stellar-sdk#c9daa9bad6487ab9505f943065e1a01568b1ec90":
+  version "11.1.0"
+  resolved "https://github.com/tyvdh/js-stellar-sdk#c9daa9bad6487ab9505f943065e1a01568b1ec90"
+  dependencies:
+    "@stellar/stellar-base" "10.0.1"
+    axios "^1.6.0"
+    bignumber.js "^9.1.2"
+    randombytes "^2.1.0"
+    toml "^3.0.0"
+    urijs "^1.19.1"
+
 "stellar-wallets-kit@github:Creit-Tech/Stellar-Wallets-Kit#v0.1.4":
   version "0.1.4"
   resolved "https://codeload.github.com/Creit-Tech/Stellar-Wallets-Kit/tar.gz/276328e4d0747d72888a6a58b93e2e4d9f764c8e"
@@ -3772,6 +3783,7 @@ strict-uri-encode@^2.0.0:
   integrity sha512-QwiXZgpRcKkhTj2Scnn++4PKtWsH0kpzZ62L2R6c/LUVYv7hVnZqcg2+sMuT6R7Jusu1vviK/MFsu6kNJfWlEQ==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
+  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
