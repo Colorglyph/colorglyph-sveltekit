@@ -12,8 +12,8 @@ import {
   nativeToScVal,
   xdr,
   BASE_FEE,
-} from "stellar-sdk";
-import type { Memo, MemoType, Transaction } from "stellar-sdk";
+} from "@stellar/stellar-sdk";
+import type { Memo, MemoType, Transaction } from "@stellar/stellar-sdk";
 import { Buffer } from "buffer";
 import type {
   ClassOptions,
@@ -300,13 +300,11 @@ export class AssembledTransaction<T> {
     const entryRes = await this.server.getLedgerEntries(
       new Contract(this.options.contractId).getFootprint()
     )
-
     if (
       !entryRes.entries ||
       !entryRes.entries.length ||
       !entryRes.entries[0].liveUntilLedgerSeq
     ) throw new Error('failed to get ledger entry')
-    
     return entryRes.entries[0].liveUntilLedgerSeq
   }
 
@@ -402,16 +400,16 @@ export class AssembledTransaction<T> {
      * contract's current `persistent` storage expiration date/ledger
      * number/block.
      */
-    wallet: Wallet | Promise<Wallet> = this.getWallet(),
-    expiration: number | Promise<number> = this.getStorageExpiration(),
+    expiration: number | Promise<number> = this.getStorageExpiration()
   ): Promise<void> => {
     if (!this.raw) throw new Error('Transaction has not yet been assembled or simulated')
     const needsNonInvokerSigningBy = await this.needsNonInvokerSigningBy()
 
     if (!needsNonInvokerSigningBy) throw new NoUnsignedNonInvokerAuthEntriesError('No unsigned non-invoker auth entries; maybe you already signed?')
-    const publicKey = (await (await wallet).getUserInfo()).publicKey
+    const publicKey = await this.getPublicKey()
     if (!publicKey) throw new Error('Could not get public key from wallet; maybe Freighter is not signed in?')
     if (needsNonInvokerSigningBy.indexOf(publicKey) === -1) throw new Error(`No auth entries for public key "${publicKey}"`)
+    const wallet = await this.getWallet()
 
     const rawInvokeHostFunctionOp = this.raw
       .operations[0] as Operation.InvokeHostFunction
@@ -439,7 +437,7 @@ export class AssembledTransaction<T> {
       authEntries[i] = await authorizeEntry(
         entry,
         async preimage => Buffer.from(
-          await (await wallet).signAuthEntry(preimage.toXDR('base64')),
+          await wallet.signAuthEntry(preimage.toXDR('base64')),
           'base64'
         ),
         await expiration,
