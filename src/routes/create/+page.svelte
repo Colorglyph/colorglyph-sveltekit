@@ -103,11 +103,12 @@
         const secret = localStorage.getItem('secret')
         const kp = secret ? Keypair.fromSecret(secret) : Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
-        await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
-        // await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
+        if (!secret) {
+            await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
+            // await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
 
-        if (!secret)
             localStorage.setItem('secret', kp.secret())
+        }
 
         await api.post('/mint', {
             palette: $palette.map((hex) => parseInt(hex.replace("#", ""), 16)),
