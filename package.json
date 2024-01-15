@@ -31,6 +31,7 @@
     }
   },
   "scripts": {
+    "prepare": "cd ./colorglyph-sdk && npm install && npm run build",
     "start": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" vite dev --host",
     "build": "vite build",
     "preview": "vite preview"
