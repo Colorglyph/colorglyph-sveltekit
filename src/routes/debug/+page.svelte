@@ -73,10 +73,6 @@
 					miner: undefined,
 					to: undefined,
 					colors: new Map(map)
-				},
-				{
-					// responseType: 'full',
-					fee: 10_000_000
 				}
 			);
 
@@ -96,10 +92,6 @@
 					to: undefined,
 					colors: mintMap,
 					width: undefined
-				},
-				{
-					// responseType: 'full',
-					fee: 10_000_000
 				}
 			);
 
@@ -114,11 +106,6 @@
 				to: undefined,
 				colors: new Map(),
 				width
-			},
-			{
-				// responseType: 'simulated',
-				// responseType: 'full',
-				fee: 10_000_000,
 			}
 		);
 
@@ -141,10 +128,6 @@
 				miner: undefined,
 				to: undefined,
 				colors: new Map(new Array(2).fill(0).map((_, i) => [i, 1000]))
-			},
-			{ 
-				// responseType: 'full', 
-				fee: 1_000_000 
 			}
 		)
 
@@ -162,10 +145,6 @@
 					[ME, 0, 1],
 					[ME, 1, 1]
 				]
-			},
-			{ 
-				// responseType: 'full', 
-				fee: 1_000_000 
 			}
 		);
 
@@ -199,10 +178,6 @@
 				to: undefined,
 				colors,
 				width: 2
-			},
-			{
-				// responseType: 'full', // TODO allow omitting this but currently gettin an error https://github.com/stellar/js-soroban-client/issues/162
-				fee: 1_000_000
 			}
 		);
 
@@ -266,10 +241,6 @@
 					values: [THEM, XLM_ID, BigInt(100)]
 				} as Offer,
 				buy: address === ME ? buy : sell
-			},
-			{
-				// responseType: 'full', 
-				fee: 1_000_000 
 			}
 		);
 
@@ -296,10 +267,6 @@
 					values: [Buffer.from(GLYPH!, 'hex')]
 				} as Offer,
 				buy: undefined
-			},
-			{ 
-				// responseType: 'full', 
-				fee: 1_000_000 
 			}
 		);
 
@@ -317,10 +284,6 @@
 					tag: 'Asset',
 					values: [XLM_ID, BigInt(100)]
 				}
-			},
-			{ 
-				// responseType: 'full', 
-				fee: 1_000_000 
 			}
 		);
 
@@ -340,10 +303,6 @@
 					tag: 'Glyph',
 					values: [Buffer.from(GLYPH!, 'hex')]
 				} as HashType
-			},
-			{ 
-				// responseType: 'full', 
-				fee: 1_000_000 
 			}
 		);
 
