@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CONTRACT_ID, XLM_ID, generateRGBSpectrum } from '$lib/utils'
+	import { CONTRACT_ID, XLM_ID, generateRGBSpectrum, isLocal } from '$lib/utils'
 	import { Contract } from 'colorglyph-sdk'
 	import type { HashType, Offer, Glyph } from 'colorglyph-sdk'
 	import { Keypair, Networks, Transaction } from '@stellar/stellar-sdk'
@@ -32,7 +32,7 @@
 			};
 		}
 		async signTransaction(xdr: string) {
-			const transaction = new Transaction(xdr, Networks.STANDALONE)
+			const transaction = new Transaction(xdr, isLocal ? Networks.STANDALONE : Networks.FUTURENET)
 
 			transaction.sign(ME_kp);
 
@@ -45,8 +45,8 @@
 
 	const ColorglyphSDK = new Contract({
 		contractId: CONTRACT_ID,
-		networkPassphrase: Networks.STANDALONE,
-		rpcUrl: 'http://localhost:8000/soroban/rpc',
+		networkPassphrase: isLocal ? Networks.STANDALONE : Networks.FUTURENET,
+		rpcUrl: isLocal ? 'http://localhost:8000/soroban/rpc' : 'https://friendbot-futurenet.stellar.org',
 		wallet: new Wallet()
 	});
 
