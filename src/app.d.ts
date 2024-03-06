@@ -2,12 +2,20 @@
 // for information about these interfaces
 declare global {
 	namespace App {
+		// interface Error {}
+		// interface Locals {}
+		// interface PageData {}
+		// interface PageState {}
 		interface Platform {
-			env?: {
-				API: Fetcher
-			},
-		}
+      env?: {
+        API: Fetcher
+      },
+      context: {
+        waitUntil(promise: Promise<any>): void;
+      };
+      caches: CacheStorage & { default: Cache }
+    }
 	}
 }
 
-export {}
+export {};

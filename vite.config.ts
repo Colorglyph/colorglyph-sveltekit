@@ -16,23 +16,27 @@ export default defineConfig({
 			allow: ["./colorglyph-sdk"]
 		}
 	},
-	optimizeDeps: {
-		esbuildOptions: {
-			define: {
+	// ssr: {
+	// 	noExternal: ['@vespaiach/axios-fetch-adapter']
+	// },
+	// optimizeDeps: {
+	// 	entries: [],
+	// 	esbuildOptions: {
+	// 		define: {
 				
-			},
-			plugins: [
+	// 		},
+	// 		plugins: [
 
-			]
-		}
-	},
-	build: {
-		minify: 'esbuild',
-		sourcemap: true,
-		rollupOptions: {
-			plugins: [
+	// 		]
+	// 	}
+	// },
+	// build: {
+	// 	minify: 'esbuild',
+	// 	sourcemap: true,
+	// 	rollupOptions: {
+	// 		plugins: [
 				
-			]
-		}
-	}
+	// 		]
+	// 	}
+	// }
 });

@@ -2,9 +2,9 @@
     "version": "0.0.0",
     "name": "colorglyph-sdk",
     "dependencies": {
-        "@stellar/freighter-api": "1.7.1",
+        "@stellar/freighter-api": "2.0.0",
         "buffer": "6.0.3",
-        "@stellar/stellar-sdk": "11.2.0"
+        "@stellar/stellar-sdk": "11.2.2"
     },
     "scripts": {
         "build": "node ./scripts/build.mjs"
@@ -16,6 +16,5 @@
     "typings": "dist/types/index.d.ts",
     "devDependencies": {
         "typescript": "5.3.3"
-    },
-    "packageManager": "npm@10.2.5"
+    }
 }

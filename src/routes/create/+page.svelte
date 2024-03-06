@@ -6,7 +6,6 @@
     import { Keypair } from '@stellar/stellar-sdk'
     import { fetcher } from 'itty-fetcher'
     import { PUBLIC_API_BASE } from '$env/static/public'
-    import lord from '@/lib/lord.json'
 
     const api = fetcher({base: PUBLIC_API_BASE})
 
@@ -82,11 +81,6 @@
         }
     }
 
-    function dark() {
-        width.set(16)
-        palette.set(lord.map((hex: number) => `#${hex.toString(16).padStart(6, '0')}`))
-    }
-
     function erase() {
         localStorage.removeItem("smol.xyz_createPalette");
         palette.set(new Array(Math.pow($width, 2)).fill("#ffffff"));
@@ -100,14 +94,14 @@
         // TODO we've added the ability to separate out destinations from source accounts
         // so we should separate out the final destination of colors and glyphs from the source accounts that pay for and progressively mint them
 
-        const secret = localStorage.getItem('secret')
+        const secret = sessionStorage.getItem('secret')
         const kp = secret ? Keypair.fromSecret(secret) : Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
         if (!secret) {
-            await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
-            // await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
+            // await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
+            await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
 
-            localStorage.setItem('secret', kp.secret())
+            sessionStorage.setItem('secret', kp.secret())
         }
 
         await api.post('/mint', {
@@ -219,10 +213,6 @@
       </label> -->
 
     <div class="mt-2 flex">
-        <button
-            on:click={dark}
-            class="mr-2 bg-black text-white py-1 px-2 rounded">👀</button
-        >
         <button
             on:click={erase}
             class="mr-2 bg-black text-white py-1 px-2 rounded">Erase</button

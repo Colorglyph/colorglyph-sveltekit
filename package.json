@@ -1,40 +1,34 @@
 {
   "name": "colorglyph-sveltekit",
-  "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "devDependencies": {
-    "@sveltejs/adapter-cloudflare": "^2.3.4",
-    "@sveltejs/kit": "^1.30.3",
-    "@types/lodash-es": "^4.17.12",
-    "autoprefixer": "^10.4.16",
-    "esbuild": "^0.19.10",
-    "miniflare": "^3.20231030.4",
-    "path": "^0.12.7",
-    "svelte": "^4.2.8",
-    "tailwindcss": "^3.4.0",
-    "tailwindcss-image-rendering": "^1.0.2",
-    "typescript": "^5.3.3",
-    "vite": "^4.5.1"
+  "scripts": {
+    "start": "vite dev --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "deploy": "npm run build && wrangler pages deploy .svelte-kit/cloudflare"
   },
-  "dependencies": {
-    "@vespaiach/axios-fetch-adapter": "^0.3.1",
-    "axios": "^0.26.1",
-    "buffer": "^6.0.3",
+  "devDependencies": {
+    "@stellar/stellar-sdk": "^11.2.2",
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/adapter-cloudflare": "^4.1.0",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "@types/node": "^20.11.24",
+    "autoprefixer": "^10.4.18",
     "colorglyph-sdk": "file:./colorglyph-sdk",
     "itty-fetcher": "^0.9.4",
     "lodash-es": "^4.17.21",
-    "@stellar/stellar-sdk": "git+https://github.com/tyvdh/js-stellar-sdk.git#293f3f2ae5795abbf5a477ae8595e724688b5335"
-  },
-  "overrides": {
-    "@stellar/stellar-sdk": {
-      "axios": "$axios"
-    }
-  },
-  "scripts": {
-    "prepare": "cd ./colorglyph-sdk && npm install && npm run build",
-    "start": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" vite dev --host",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "packageManager": "npm@10.2.5"
+    "miniflare": "^3.20240223.1",
+    "postcss": "^8.4.35",
+    "svelte": "^4.2.7",
+    "svelte-check": "^3.6.0",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-image-rendering": "^1.0.2",
+    "tslib": "^2.4.1",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.3"
+  }
 }

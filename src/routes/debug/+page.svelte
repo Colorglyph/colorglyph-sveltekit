@@ -8,10 +8,10 @@
 	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2')
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y'
 	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
-	const XLM = 'CB64D3G7SM2RTH6JSGG34DDTFTQ5CFDKVDZJZSODMCX4NJ2HV2KN7OHT'
-	const CONTRACT_ID = 'CC5YDEXJXBOBNUSHX52DIIAOOJJMACKFTFU7FRIWJRRNZG2K5YRCETVW'
+	const XLM = 'CDMLFMKMMD7MWZP3FKUBZPVHTUEDLSX4BYGYKH4GCESXYHS3IHQ4EIG4'
+	const CONTRACT_ID = 'CDAKCDGVQIOHNYSOBBHL3WQZVRFF5M6FCZXCC7QLSCSVAV52KQVTO6FR'
 
-	let GLYPH: string | undefined = '252ea0ad98ca90c11f8a281c6e9c56ea4e7f9ccb15fcfe1dbb6b2ef446ccaf79';
+	let GLYPH: string | undefined = '9eb925d1fe9970fc0e2e93ad1b4c8c1e92136600f9aac84b89dda44814d188cb';
 
 	// TODO
 	// glyph_mint & offer_post return values are broken https://github.com/stellar/soroban-tools/issues/739
@@ -34,7 +34,7 @@
 			};
 		}
 		async signTransaction(xdr: string) {
-			const transaction = new Transaction(xdr, Networks.FUTURENET)
+			const transaction = new Transaction(xdr, Networks.STANDALONE)
 
 			transaction.sign(ME_kp);
 
@@ -47,9 +47,8 @@
 
 	const ColorglyphSDK = new Contract({
 		contractId: CONTRACT_ID,
-		networkPassphrase: Networks.FUTURENET,
-		rpcUrl: 'https://rpc-futurenet.stellar.org',
-		// rpcUrl: 'http://localhost:8000/soroban/rpc',
+		networkPassphrase: Networks.STANDALONE,
+		rpcUrl: 'http://localhost:8000/soroban/rpc',
 		wallet: new Wallet()
 	});
 
@@ -241,7 +240,7 @@
 
 		palette = new Array(glyph.length).fill(256 ** 3 - 1);
 		
-		for (const [_account, colors] of glyph.colors.values()) {
+		for (const [_account, colors] of glyph.colors) {
 			for (const [color, indexes] of colors) {
 				for (const index of indexes as number[]) {
 					palette.splice(index, 1, Number(color))	
