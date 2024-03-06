@@ -46,7 +46,7 @@
 	const ColorglyphSDK = new Contract({
 		contractId: CONTRACT_ID,
 		networkPassphrase: isLocal ? Networks.STANDALONE : Networks.FUTURENET,
-		rpcUrl: isLocal ? 'http://localhost:8000/soroban/rpc' : 'https://friendbot-futurenet.stellar.org',
+		rpcUrl: isLocal ? 'http://localhost:8000/soroban/rpc' : 'https://rpc-futurenet.stellar.org',
 		wallet: new Wallet()
 	});
 
