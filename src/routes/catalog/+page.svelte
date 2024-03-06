@@ -1,10 +1,9 @@
 <script lang="ts">
     import { fetcher } from 'itty-fetcher'
     import { onMount } from 'svelte'
-    import { PUBLIC_API_BASE } from '$env/static/public'
+    import { API_BASE } from '$lib/utils';
 
-    const api_url = PUBLIC_API_BASE
-    const api = fetcher({base: api_url})
+    const api = fetcher({base: API_BASE})
 
     interface Glyph {
         name: string
@@ -56,7 +55,7 @@
                 ? 'bg-green-500'
                 : 'bg-black' 
             }"></span>
-            <img class="w-full rendering-pixelated" src="{api_url}/image/{glyph.name}">
+            <img class="w-full rendering-pixelated" src="{API_BASE}/image/{glyph.name}">
         </div>
     {/each}
 </div>

@@ -2,12 +2,11 @@
     // TODO use a loader to prepopulate the data or just make the whole site static
     // currently we're double loading stuff. Once on the server and again on the client
 
-	import { generateRandomSpectrum } from "$lib/utils"
+	import { API_BASE, generateRandomSpectrum, isLocal } from "$lib/utils"
     import { fetcher } from 'itty-fetcher'
-    import { PUBLIC_API_BASE } from '$env/static/public'
     import { Keypair } from '@stellar/stellar-sdk'
 
-    const api = fetcher({base: PUBLIC_API_BASE})
+    const api = fetcher({base: API_BASE})
 
     let width: number = 9
     let detail: number = 2
@@ -39,8 +38,11 @@
         const kp = secret ? Keypair.fromSecret(secret) : Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
         if (!secret) {
-            // await fetch(`https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`)
-            await fetch(`http://localhost:8000/friendbot?addr=${kp.publicKey()}`)
+            await fetch(
+                isLocal 
+                ? `http://localhost:8000/friendbot?addr=${kp.publicKey()}`
+                : `https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`
+            )
 
             sessionStorage.setItem('secret', kp.secret())
         }

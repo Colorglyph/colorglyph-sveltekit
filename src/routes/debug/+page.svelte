@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { generateRGBSpectrum } from '$lib/utils'
+	import { CONTRACT_ID, XLM_ID, generateRGBSpectrum } from '$lib/utils'
 	import { Contract } from 'colorglyph-sdk'
 	import type { HashType, Offer, Glyph } from 'colorglyph-sdk'
 	import { Keypair, Networks, Transaction } from '@stellar/stellar-sdk'
@@ -8,8 +8,6 @@
 	const ME_kp = Keypair.fromSecret('SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2')
 	const THEM = 'GAID7BB5TASKY4JBDBQX2IVD33CUYXUPDS2O5NAVAP277PLMHFE6AO3Y'
 	const THEM_kp = Keypair.fromSecret('SBC6V4TL6TS2JHUWSFB6QHNVFYV6VZH3QOAYK5QHRALSPWDVW2MKOBOC')
-	const XLM = 'CDMLFMKMMD7MWZP3FKUBZPVHTUEDLSX4BYGYKH4GCESXYHS3IHQ4EIG4'
-	const CONTRACT_ID = 'CDAKCDGVQIOHNYSOBBHL3WQZVRFF5M6FCZXCC7QLSCSVAV52KQVTO6FR'
 
 	let GLYPH: string | undefined = '9eb925d1fe9970fc0e2e93ad1b4c8c1e92136600f9aac84b89dda44814d188cb';
 
@@ -258,14 +256,14 @@
 		} as Offer;
 		const buy = {
 			tag: 'Asset',
-			values: [XLM, BigInt(100)]
+			values: [XLM_ID, BigInt(100)]
 		} as Offer;
 
 		let tx = await ColorglyphSDK.offerPost(
 			{
 				sell: address === ME ? sell : {
 					tag: 'AssetSell',
-					values: [THEM, XLM, BigInt(100)]
+					values: [THEM, XLM_ID, BigInt(100)]
 				} as Offer,
 				buy: address === ME ? buy : sell
 			},
@@ -317,7 +315,7 @@
 				},
 				buy: {
 					tag: 'Asset',
-					values: [XLM, BigInt(100)]
+					values: [XLM_ID, BigInt(100)]
 				}
 			},
 			{ 
