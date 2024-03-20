@@ -1,6 +1,8 @@
 import { PUBLIC_API_BASE, PUBLIC_NETWORK, PUBLIC_CONTRACT_ID, PUBLIC_XLM_ID } from '$env/static/public'
 
 export const isLocal = PUBLIC_NETWORK === 'local'
+export const isFuture = PUBLIC_NETWORK === 'future'
+export const isTest = PUBLIC_NETWORK === 'test'
 export const API_BASE = PUBLIC_API_BASE
 export const CONTRACT_ID = PUBLIC_CONTRACT_ID
 export const XLM_ID = PUBLIC_XLM_ID

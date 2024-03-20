@@ -5,7 +5,7 @@
     import HexGlyph from "@/components/Hexglyph.svelte";
     import { Keypair } from '@stellar/stellar-sdk'
     import { fetcher } from 'itty-fetcher'
-    import { API_BASE, isLocal } from "$lib/utils";
+    import { API_BASE, isFuture, isLocal, isTest } from "$lib/utils";
 
     const api = fetcher({base: API_BASE})
 
@@ -97,11 +97,18 @@
         const secret = sessionStorage.getItem('secret')
         const kp = secret ? Keypair.fromSecret(secret) : Keypair.random() // Allows us to queue up a bunch of different mints. Otherwise we get into trouble with the progressive mint
 
-        if (!secret) {
-            await fetch(
+        if (
+            !secret
+            && (
                 isLocal
-                ? `http://localhost:8000/friendbot?addr=${kp.publicKey()}`
-                : `https://friendbot-futurenet.stellar.org/?addr=${kp.publicKey()}`
+                || isFuture
+                || isTest
+            )
+        ) {
+            await fetch(
+                isLocal ? `http://localhost:8000/friendbot?addr=${kp.publicKey()}`
+                : isFuture ? `https://friendbot-futurenet.stellar.org?addr=${kp.publicKey()}`
+                : `https://friendbot.stellar.org?addr=${kp.publicKey()}`
             )
 
             sessionStorage.setItem('secret', kp.secret())
