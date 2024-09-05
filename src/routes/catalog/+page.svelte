@@ -7,7 +7,6 @@
 
     interface Glyph {
         Hash: string;
-        Id: string;
     }
 
     let glyphs: Glyph[] = [];
@@ -22,20 +21,11 @@
             glyphs = res;
         });
     }
-    async function getStatus(glyph: Glyph) {
-        console.log(glyph);
-
-        await api.get(`/mint/${glyph.Id}`).then((res: any) => {
-            console.log(res);
-            // glyph.metadata.status = res.status ?? glyph.metadata.status;
-            // glyphs = glyphs;
-        });
-    }
 </script>
 
 <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1">
     {#each glyphs as glyph}
-        <div class="relative" on:click={() => getStatus(glyph)}>
+        <div class="relative">
             <!-- <span
                 class="w-3 h-3 rounded-full absolute top-1 left-1 border-2 border-white {glyph
                     .metadata.status === 'mining'
