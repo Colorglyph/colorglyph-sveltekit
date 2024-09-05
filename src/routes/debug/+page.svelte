@@ -10,7 +10,9 @@
 	} from "$lib/utils";
 	import { Client } from "colorglyph-sdk";
 	import type { Offer } from "colorglyph-sdk";
-	import { Keypair, Networks, Transaction } from "@stellar/stellar-sdk";
+	import { Horizon, Keypair, Networks, Transaction } from "@stellar/stellar-sdk";
+	import { basicNodeSigner } from "@stellar/stellar-sdk/contract";
+    import { Api } from "@stellar/stellar-sdk/rpc";
 
 	const ME_kp = Keypair.fromSecret(
 		"SAE27A5S6U32MAQBEB6GD4YAJFGGSSFINKB5QO64ZW32NBBMBYESNKN2", // GBGP5SD75TDB2ZL7JDJEFPSWDBEQRDJ4757ZXL57TOOQJSMWROT5JYKD
@@ -32,6 +34,27 @@
 
 	// palette = generateRGBSpectrum(width)
 
+	const ME_signer = basicNodeSigner(
+		ME_kp,
+		isLocal
+			? Networks.STANDALONE
+			: isFuture
+				? Networks.FUTURENET
+				: isTest
+					? Networks.TESTNET
+					: Networks.PUBLIC,
+	);
+	const THEM_signer = basicNodeSigner(
+		THEM_kp,
+		isLocal
+			? Networks.STANDALONE
+			: isFuture
+				? Networks.FUTURENET
+				: isTest
+					? Networks.TESTNET
+					: Networks.PUBLIC,
+	);
+
 	const ColorglyphSDK = new Client({
 		publicKey: ME,
 		contractId: CONTRACT_ID,
@@ -49,22 +72,8 @@
 				: isTest
 					? "https://soroban-testnet.stellar.org"
 					: "https://mainnet.stellar.validationcloud.io/v1/l2ADLNFEi0TT0loic8mjHnUmq5gmVQxT8a7iaWZqYUc",
-		async signTransaction(xdr: string) {
-			const transaction = new Transaction(
-				xdr,
-				isLocal
-					? Networks.STANDALONE
-					: isFuture
-						? Networks.FUTURENET
-						: isTest
-							? Networks.TESTNET
-							: Networks.PUBLIC,
-			);
-
-			transaction.sign(ME_kp);
-
-			return transaction.toXDR();
-		},
+		signTransaction: ME_signer.signTransaction,
+		signAuthEntry: THEM_signer.signAuthEntry,
 	});
 
 	async function super_mint() {
@@ -218,7 +227,7 @@
 	async function glyph_transfer() {}
 
 	// TODO switch to use getLedgerEntry
-	async function glyph_get(key = ME) {
+	async function glyph_get() {
 		let { result: res } = await ColorglyphSDK.glyph_get({
 			hash: Buffer.from(GLYPH!, "hex"),
 		});
@@ -256,20 +265,28 @@
 					? sell
 					: {
 							tag: "AssetSell",
-							values: [THEM, XLM_ID, BigInt(100)],
+							values: [THEM, XLM_ID, BigInt(200)],
 						},
 			buy:
 				address === ME
+					// ? {
+					// 		tag: "Asset",
+					// 		values: [XLM_ID, BigInt(100)],
+					// 	}
 					? {
-							tag: "Asset",
-							values: [XLM_ID, BigInt(100)],
-						}
+							tag: "Glyph",
+							values: [Buffer.from("e6e08fd9c1a3abf0abd70c4046f0a7a054f44d5151faa8499c96e043e4830a45", "hex")],
+					}
 					: sell,
 		});
 
-		let { result: res } = await tx.signAndSend();
+		if (address === THEM)
+			await tx.signAuthEntries({publicKey: THEM});
 
-		console.log(res);
+		let { result: res, getTransactionResponse } = await tx.signAndSend();
+
+		if (getTransactionResponse?.status === Api.GetTransactionStatus.SUCCESS)
+			console.log(res, getTransactionResponse.ledger);
 	}
 
 	// TODO switch to use getLedgerEntry
@@ -287,11 +304,15 @@
 				tag: "Glyph",
 				values: [Buffer.from(GLYPH!, "hex")],
 			},
+			buy: {
+				tag: "Glyph",
+				values: [Buffer.from("e6e08fd9c1a3abf0abd70c4046f0a7a054f44d5151faa8499c96e043e4830a45", "hex")],
+			}
 			// buy: {
 			// 	tag: "Asset",
 			// 	values: [XLM_ID, BigInt(100)],
 			// }
-			buy: undefined,
+			// buy: undefined,
 		});
 
 		console.log(res);
@@ -309,9 +330,10 @@
 			},
 		});
 
-		let { result: res } = await tx.signAndSend();
+		let { result: res, getTransactionResponse } = await tx.signAndSend();
 
-		console.log(res);
+		if (getTransactionResponse?.status === Api.GetTransactionStatus.SUCCESS)
+			console.log(res, getTransactionResponse.ledger);
 	}
 
 	// TODO Not getting the error I would expect when trying to scrape a glyph the signer doesn't own
@@ -344,7 +366,7 @@
 	<button class="bg-black text-white" on:click={() => glyph_mint()}
 		>Glyph Mint</button
 	>
-	<button class="bg-black text-white" on:click={() => glyph_get(ME)}
+	<button class="bg-black text-white" on:click={() => glyph_get()}
 		>Glyph Get</button
 	>
 
